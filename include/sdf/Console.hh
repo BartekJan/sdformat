@@ -73,6 +73,25 @@ namespace sdf
             Console::Instance()->logFileStream << rhs;
           return *this;
         }
+
+        /// \brief Print a prefix to both terminal and log file.
+        /// \param[in] _lbl Text label
+        /// \param[in] _file File containing the error
+        /// \param[in] _line Line containing the error
+        /// \param[in] _color Color to make the label.  Used only on terminal.
+        void Prefix(const std::string &lbl,
+                    const std::string &file,
+                    unsigned int line, int color)
+        {
+          int index = file.find_last_of("/") + 1;
+          if (stream)
+            *stream << "\033[1;" << color << "m" << lbl << " [" <<
+              file.substr(index , file.size() - index)<< ":" << line <<
+              "]\033[0m ";
+          if (Console::Instance()->logFileStream.is_open())
+            Console::Instance()->logFileStream << lbl << " [" <<
+              file.substr(index , file.size() - index)<< ":" << line << "] ";
+        }
     };
 
     /// \brief Default constructor
