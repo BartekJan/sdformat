@@ -1,8 +1,6 @@
 set (sdfs
   1_3.convert
   actor.sdf
-  audio_sink.sdf
-  audio_source.sdf
   box_shape.sdf
   camera.sdf
   collision.sdf
@@ -10,6 +8,7 @@ set (sdfs
   cylinder_shape.sdf
   forcetorque.sdf
   geometry.sdf
+  gps.sdf
   gripper.sdf
   gui.sdf
   heightmap_shape.sdf
@@ -21,6 +20,7 @@ set (sdfs
   link.sdf
   mesh_shape.sdf
   model.sdf
+  noise.sdf
   physics.sdf
   plane_shape.sdf
   plugin.sdf
@@ -32,6 +32,7 @@ set (sdfs
   root.sdf
   scene.sdf
   sensor.sdf
+  spherical_coordinates.sdf
   sphere_shape.sdf
   sonar.sdf
   state.sdf
