@@ -24,6 +24,7 @@
 const std::string SDF_TEST_FILE = std::string(PROJECT_SOURCE_PATH)
   + "/test/integration/provide_feedback.urdf";
 
+/////////////////////////////////////////////////
 TEST(SDFParser, ProvideFeedbackTest)
 {
   sdf::SDFPtr robot(new sdf::SDF());
@@ -58,4 +59,3 @@ TEST(SDFParser, ProvideFeedbackTest)
     }
   }
 }
-
