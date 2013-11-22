@@ -276,7 +276,7 @@ namespace sdf
     /// tolerence (1e-3), false otherwise
     public: bool operator==(const sdf::Vector3 &_pt) const
             {
-              return equal(this->x, _pt.x, 0.001) && 
+              return equal(this->x, _pt.x, 0.001) &&
                      equal(this->y, _pt.y, 0.001) &&
                      equal(this->z, _pt.z, 0.001);
             }
@@ -526,13 +526,13 @@ namespace sdf
     public: friend std::istream &operator>>(std::istream &_in,
                                              Quaternion &_q)
     {
-      double r, p, y;
+      double roll, pitch, yaw;
 
       // Skip white spaces
       _in.setf(std::ios_base::skipws);
-      _in >> r >> p >> y;
+      _in >> roll >> pitch >> yaw;
 
-      _q.SetFromEuler(Vector3(r, p, y));
+      _q.SetFromEuler(Vector3(roll, pitch, yaw));
 
       return _in;
     }
@@ -547,13 +547,13 @@ namespace sdf
 
     public: inline void Correct()
             {
-              if (!finite(this->x))
+              if (!std::isfinite(this->x))
                 this->x = 0;
-              if (!finite(this->y))
+              if (!std::isfinite(this->y))
                 this->y = 0;
-              if (!finite(this->z))
+              if (!std::isfinite(this->z))
                 this->z = 0;
-              if (!finite(this->w))
+              if (!std::isfinite(this->w))
                 this->w = 1;
 
               if (equal(this->w, 0.0) && equal(this->x, 0.0) &&
