@@ -25,13 +25,19 @@ string (TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 set (SDF_MAJOR_VERSION 1)
 set (SDF_MINOR_VERSION 4)
-set (SDF_PATCH_VERSION 2)
+set (SDF_PATCH_VERSION 10)
 
 set (SDF_VERSION ${SDF_MAJOR_VERSION}.${SDF_MINOR_VERSION})
 set (SDF_VERSION_FULL ${SDF_MAJOR_VERSION}.${SDF_MINOR_VERSION}.${SDF_PATCH_VERSION})
 
 message (STATUS "${PROJECT_NAME} version ${SDF_VERSION_FULL}")
 set (CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
+
+# Include GNUInstallDirs to get canonical paths
+include(GNUInstallDirs)
+
+# Default test type for test all over source
+set(TEST_TYPE "UNIT")
 
 # developer's option to cache PKG_CONFIG_PATH and
 # LD_LIBRARY_PATH for local installs
@@ -42,9 +48,9 @@ if(LD_LIBRARY_PATH)
   set (ENV{LD_LIBRARY_PATH} ${LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH})
 endif()
 
-set (INCLUDE_INSTALL_DIR "include/sdf-${SDF_VERSION}/sdf") 
-set (LIB_INSTALL_DIR "lib" CACHE STRING "Installation directory for libraries (relative to CMAKE_INSTALL_PREFIX)") 
-set (BIN_INSTALL_DIR "bin" CACHE STRING "Installation directory for binaries (relative to CMAKE_INSTALL_PREFIX)") 
+set (INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/sdformat-${SDF_VERSION}/sdf") 
+set (LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR} CACHE STRING "Installation directory for libraries (relative to CMAKE_INSTALL_PREFIX)") 
+set (BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR} CACHE STRING "Installation directory for binaries (relative to CMAKE_INSTALL_PREFIX)") 
 
 set (USE_FULL_RPATH OFF CACHE BOOL "Set to true to enable full rpath")
 
@@ -86,7 +92,13 @@ set (CMAKE_C_FLAGS_ALL " -Wall -Wextra -Wno-long-long -Wno-unused-value -Wno-unu
 set (CMAKE_LINK_FLAGS_RELEASE " " CACHE INTERNAL "Link flags fro release" FORCE)
 set (CMAKE_LINK_FLAGS_DEBUG " " CACHE INTERNAL "Link flags for debug" FORCE)
 
-set (CMAKE_C_FLAGS_RELEASE " -s -O2 -DNDEBUG ${CMAKE_C_FLAGS_ALL}"
+set (CMAKE_C_FLAGS_RELEASE "")
+if (NOT APPLE)
+  # -s doesn't work with default osx compiler clang, alternative:
+  # http://stackoverflow.com/questions/6085491/gcc-vs-clang-symbol-strippingu
+  set (CMAKE_C_FLAGS_RELEASE " -s ")
+endif()
+set (CMAKE_C_FLAGS_RELEASE " ${CMAKE_C_FLAGS_RELEASE} -O2 -DNDEBUG ${CMAKE_C_FLAGS_ALL}"
   CACHE INTERNAL "C Flags for release" FORCE)
 set (CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 
@@ -190,19 +202,19 @@ else (buid_errors)
 
   ########################################
   # Make the package config file
-  configure_file(${CMAKE_SOURCE_DIR}/cmake/sdf_pc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/cmake/sdf.pc @ONLY)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/sdf.pc DESTINATION
+  configure_file(${CMAKE_SOURCE_DIR}/cmake/sdformat_pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/sdformat.pc @ONLY)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/sdformat.pc DESTINATION
     ${LIB_INSTALL_DIR}/pkgconfig COMPONENT pkgconfig)
 
   ########################################
   # Make the cmake config files
   set(PKG_NAME ${PROJECT_NAME})
-  set(PKG_LIBRARIES sdf)
+  set(PKG_LIBRARIES sdformat)
   set(PKG_DEPENDS Boost)
   set(cmake_conf_file "cmake/sdf_config.cmake")
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${cmake_conf_file}.in" "${CMAKE_CURRENT_BINARY_DIR}/SDFConfig.cmake" @ONLY)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SDFConfig.cmake DESTINATION share/${PROJECT_NAME_LOWER}/cmake/ COMPONENT cmake)
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${cmake_conf_file}.in" "${CMAKE_CURRENT_BINARY_DIR}/SDFormatConfig.cmake" @ONLY)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SDFormatConfig.cmake DESTINATION ${LIB_INSTALL_DIR}/cmake/${PROJECT_NAME_LOWER}/ COMPONENT cmake)
 
   ########################################
   # Package Creation: 
