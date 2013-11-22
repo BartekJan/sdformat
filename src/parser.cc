@@ -251,7 +251,10 @@ bool readFile(const std::string &_filename, SDFPtr _sdf)
   std::string filename = sdf::findFile(_filename);
 
   if (filename.empty())
+  {
+    sdferr << "Error finding file [" << _filename << "].\n";
     return false;
+  }
 
   xmlDoc.LoadFile(filename);
   if (readDoc(&xmlDoc, _sdf, filename))
@@ -262,7 +265,7 @@ bool readFile(const std::string &_filename, SDFPtr _sdf)
     TiXmlDocument doc = u2g.InitModelFile(filename);
     if (sdf::readDoc(&doc, _sdf, "urdf file"))
     {
-      sdfwarn << "parse from urdf file [" << _filename << "].\n";
+      sdfdbg << "parse from urdf file [" << _filename << "].\n";
       return true;
     }
     else
@@ -288,7 +291,7 @@ bool readString(const std::string &_xmlString, SDFPtr _sdf)
     TiXmlDocument doc = u2g.InitModelString(_xmlString);
     if (sdf::readDoc(&doc, _sdf, "urdf string"))
     {
-      sdfwarn << "parse from urdf.\n";
+      sdfdbg << "Parsing from urdf.\n";
       return true;
     }
     else
@@ -327,19 +330,14 @@ bool readDoc(TiXmlDocument *_xmlDoc, SDFPtr _sdf, const std::string &_source)
 
   // check sdf version, use old parser if necessary
   TiXmlElement *sdfNode = _xmlDoc->FirstChildElement("sdf");
-
-  // Backward compatible with SDF
-  if (!sdfNode && _xmlDoc->FirstChildElement("sdf"))
-  {
-    Converter::Convert(_xmlDoc, SDF::version);
-    sdfNode = _xmlDoc->FirstChildElement("sdf");
-  }
+  if (!sdfNode)
+    sdfNode = _xmlDoc->FirstChildElement("gazebo");
 
   if (sdfNode && sdfNode->Attribute("version"))
   {
     if (strcmp(sdfNode->Attribute("version"), SDF::version.c_str()) != 0)
     {
-      sdfwarn << "Converting a deprecatd source[" << _source << "].\n";
+      sdfwarn << "Converting a deprecated source[" << _source << "].\n";
       Converter::Convert(_xmlDoc, SDF::version);
     }
 
@@ -355,13 +353,13 @@ bool readDoc(TiXmlDocument *_xmlDoc, SDFPtr _sdf, const std::string &_source)
   {
     // try to use the old deprecated parser
     if (!sdfNode)
-      sdfwarn << "No <sdf> element in file[" << _source << "]\n";
+      sdfdbg << "No <sdf> element in file[" << _source << "]\n";
     else if (!sdfNode->Attribute("version"))
-      sdfwarn << "SDF <sdf> element has no version in file["
+      sdfdbg << "SDF <sdf> element has no version in file["
              << _source << "]\n";
     else if (strcmp(sdfNode->Attribute("version"),
                     SDF::version.c_str()) != 0)
-      sdfwarn << "SDF version ["
+      sdfdbg << "SDF version ["
             << sdfNode->Attribute("version")
             << "] is not " << SDF::version << "\n";
     return false;
@@ -382,13 +380,8 @@ bool readDoc(TiXmlDocument *_xmlDoc, ElementPtr _sdf,
 
   // check sdf version, use old parser if necessary
   TiXmlElement *sdfNode = _xmlDoc->FirstChildElement("sdf");
-
-  // Backward compatible with SDF
-  if (!sdfNode && _xmlDoc->FirstChildElement("sdf"))
-  {
-    Converter::Convert(_xmlDoc, SDF::version);
-    sdfNode = _xmlDoc->FirstChildElement("sdf");
-  }
+  if (!sdfNode)
+    sdfNode = _xmlDoc->FirstChildElement("gazebo");
 
   if (sdfNode && sdfNode->Attribute("version"))
   {
@@ -418,12 +411,12 @@ bool readDoc(TiXmlDocument *_xmlDoc, ElementPtr _sdf,
   {
     // try to use the old deprecated parser
     if (!sdfNode)
-      sdfwarn << "SDF has no <sdf> element\n";
+      sdfdbg << "SDF has no <sdf> element\n";
     else if (!sdfNode->Attribute("version"))
-      sdfwarn << "<sdf> element has no version\n";
+      sdfdbg << "<sdf> element has no version\n";
     else if (strcmp(sdfNode->Attribute("version"),
                     SDF::version.c_str()) != 0)
-      sdfwarn << "SDF version ["
+      sdfdbg << "SDF version ["
             << sdfNode->Attribute("version")
             << "] is not " << SDF::version << "\n";
     return false;
@@ -577,8 +570,6 @@ bool readXml(TiXmlElement *_xml, ElementPtr _sdf)
             else
             {
               TiXmlElement *sdfXML = modelXML->FirstChildElement("sdf");
-              if (!sdfXML)
-                sdfXML = modelXML->FirstChildElement("sdf");
 
               TiXmlElement *sdfSearch = sdfXML;
 
