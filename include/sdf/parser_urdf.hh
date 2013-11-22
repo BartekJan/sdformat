@@ -36,6 +36,7 @@ namespace sdf
     private: SDFExtension()
     {
       material.clear();
+      visual_blobs.clear();
       setStaticFlag = false;
       gravity = true;
       isDampingFactor = false;
@@ -56,7 +57,7 @@ namespace sdf
       isInitialJointPosition = false;
       isFudgeFactor = false;
       isProvideFeedback = false;
-      isCFMDamping = false;
+      isImplicitSpringDamper = false;
       blobs.clear();
 
       dampingFactor = 0;
@@ -76,12 +77,13 @@ namespace sdf
       fudgeFactor = 1;
 
       provideFeedback = false;
-      cfmDamping = false;
+      implicitSpringDamper = false;
     };
 
     private: SDFExtension(const SDFExtension &ge)
     {
       material = ge.material;
+      visual_blobs = ge.visual_blobs;
       setStaticFlag = ge.setStaticFlag;
       gravity = ge.gravity;
       isDampingFactor = ge.isDampingFactor;
@@ -102,9 +104,9 @@ namespace sdf
       isInitialJointPosition = ge.isInitialJointPosition;
       isFudgeFactor = ge.isFudgeFactor;
       isProvideFeedback = ge.isProvideFeedback;
-      isCFMDamping = ge.isCFMDamping;
+      isImplicitSpringDamper = ge.isImplicitSpringDamper;
       provideFeedback = ge.provideFeedback;
-      cfmDamping = ge.cfmDamping;
+      implicitSpringDamper = ge.implicitSpringDamper;
       oldLinkName = ge.oldLinkName;
       reductionTransform = ge.reductionTransform;
       blobs = ge.blobs;
@@ -124,8 +126,6 @@ namespace sdf
       stopErp = ge.stopErp;
       initialJointPosition = ge.initialJointPosition;
       fudgeFactor = ge.fudgeFactor;
-      provideFeedback = ge.provideFeedback;
-      cfmDamping = ge.cfmDamping;
     };
 
     // for reducing fixed joints and removing links
@@ -134,6 +134,7 @@ namespace sdf
 
     // visual
     public: std::string material;
+    public: std::vector<boost::shared_ptr<TiXmlElement> > visual_blobs;
 
     // body, default off
     public: bool setStaticFlag;
@@ -160,13 +161,13 @@ namespace sdf
     public: double stopCfm, stopErp, initialJointPosition, fudgeFactor;
     public: bool isProvideFeedback;
     public: bool provideFeedback;
-    public: bool isCFMDamping;
-    public: bool cfmDamping;
+    public: bool isImplicitSpringDamper;
+    public: bool implicitSpringDamper;
     private: bool isStopKp, isStopKd;
     private: double stopKp, stopKd;
 
     // blobs into body or robot
-    public: std::vector<TiXmlElement*> blobs;
+    public: std::vector<boost::shared_ptr<TiXmlElement> > blobs;
 
     friend class URDF2SDF;
   };
