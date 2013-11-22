@@ -21,7 +21,7 @@
 
 #include "sdf/parser.hh"
 #include "sdf/Assert.hh"
-#include "sdf/SDF.hh"
+#include "sdf/SDFImpl.hh"
 #include "sdf/sdf_config.h"
 
 using namespace sdf;
@@ -113,7 +113,14 @@ std::string sdf::findFile(const std::string &_filename, bool _searchLocalPath,
   // flag has been set
   if (_useCallback)
   {
-    return g_findFileCB(_filename);
+    if (!g_findFileCB)
+    {
+      sdferr << "Tried to use callback in sdf::findFile(), but the callback "
+        "is empty.  Did you call sdf::setFindCallback()?";
+      return std::string();
+    }
+    else
+      return g_findFileCB(_filename);
   }
 
   return std::string();
@@ -1134,6 +1141,7 @@ std::string SDF::ToString() const
 {
   std::ostringstream stream;
 
+  stream << "<?xml version='1.0'?>\n";
   if (this->root->GetName() != "sdf")
     stream << "<sdf version='" << SDF::version << "'>\n";
 
@@ -1154,5 +1162,3 @@ void SDF::SetFromString(const std::string &_sdfData)
     sdferr << "Unable to parse sdf string[" << _sdfData << "]\n";
   }
 }
-
-
