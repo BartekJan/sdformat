@@ -16,16 +16,22 @@
 */
 
 #include <gtest/gtest.h>
-#include "sdf/sdf.hh"
+#include "sdf/Console.hh"
 
-#include "test_config.h"
-
-const std::string SDF_TEST_FILE =
-  std::string(PROJECT_SOURCE_PATH) + "/test/integration/audio.sdf";
-
-TEST(SDFParser, AudioSDF_FullParameters_noThrow)
+////////////////////////////////////////////////////
+/// Test out the differerent console messages.
+TEST(Console, Messages)
 {
-  sdf::SDFPtr p(new sdf::SDF());
-  sdf::init(p);
-  ASSERT_TRUE(sdf::readFile(SDF_TEST_FILE, p));
+  sdferr << "Error.\n";
+  sdfwarn << "Warning.\n";
+  sdfmsg << "Message.\n";
+  sdfdbg << "Debug.\n";
+}
+
+/////////////////////////////////////////////////
+/// Main
+int main(int argc, char **argv)
+{
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
