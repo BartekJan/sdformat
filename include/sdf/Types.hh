@@ -40,7 +40,7 @@ namespace sdf
   /// \param[in] _epsilon the tolerance
   template<typename T>
   inline bool equal(const T &_a, const T &_b,
-                    const T &_epsilon = 1e-3)
+                    const T &_epsilon = 1e-6)
   {
     return std::fabs(_a - _b) <= _epsilon;
   }
@@ -272,12 +272,13 @@ namespace sdf
 
     /// \brief Equal to operator
     /// \param[in] _pt The vector to compare against
-    /// \return true if each component is equal withing a
-    /// default tolerence (1e-6), false otherwise
+    /// \return true if each component is equal within a
+    /// tolerence (1e-3), false otherwise
     public: bool operator==(const sdf::Vector3 &_pt) const
             {
-              return equal(this->x, _pt.x) && equal(this->y, _pt.y) &&
-                equal(this->z, _pt.z);
+              return equal(this->x, _pt.x, 0.001) &&
+                     equal(this->y, _pt.y, 0.001) &&
+                     equal(this->z, _pt.z, 0.001);
             }
 
     /// \brief Stream extraction operator
@@ -525,13 +526,13 @@ namespace sdf
     public: friend std::istream &operator>>(std::istream &_in,
                                              Quaternion &_q)
     {
-      double r, p, y;
+      double roll, pitch, yaw;
 
       // Skip white spaces
       _in.setf(std::ios_base::skipws);
-      _in >> r >> p >> y;
+      _in >> roll >> pitch >> yaw;
 
-      _q.SetFromEuler(Vector3(r, p, y));
+      _q.SetFromEuler(Vector3(roll, pitch, yaw));
 
       return _in;
     }
@@ -546,13 +547,13 @@ namespace sdf
 
     public: inline void Correct()
             {
-              if (!finite(this->x))
+              if (!std::isfinite(this->x))
                 this->x = 0;
-              if (!finite(this->y))
+              if (!std::isfinite(this->y))
                 this->y = 0;
-              if (!finite(this->z))
+              if (!std::isfinite(this->z))
                 this->z = 0;
-              if (!finite(this->w))
+              if (!std::isfinite(this->w))
                 this->w = 1;
 
               if (equal(this->w, 0.0) && equal(this->x, 0.0) &&

@@ -11,7 +11,7 @@ link_directories(
   ${Boost_LIBRARY_DIRS}
 )
 
-# configure_file (test_config.h.in ${PROJECT_BINARY_DIR}/test_config.h)
+configure_file (test_config.h.in ${PROJECT_BINARY_DIR}/test_config.h)
 
 # Build gtest
 add_library(gtest STATIC gtest/src/gtest-all.cc)
@@ -23,3 +23,6 @@ set(GTEST_MAIN_LIBRARY "${PROJECT_BINARY_DIR}/test/libgtest_main.a")
 execute_process(COMMAND cmake -E remove_directory ${CMAKE_BINARY_DIR}/test_results)
 execute_process(COMMAND cmake -E make_directory ${CMAKE_BINARY_DIR}/test_results)
 include_directories(${GTEST_INCLUDE_DIRS})
+
+add_subdirectory(integration)
+add_subdirectory(performance)

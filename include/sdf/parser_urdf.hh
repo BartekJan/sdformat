@@ -36,9 +36,11 @@ namespace sdf
     private: SDFExtension()
     {
       material.clear();
+      visual_blobs.clear();
       setStaticFlag = false;
       gravity = true;
       isDampingFactor = false;
+      isMaxContacts = false;
       isMaxVel = false;
       isMinDepth = false;
       fdir1.clear();
@@ -50,13 +52,16 @@ namespace sdf
       isLaserRetro = false;
       isStopCfm = false;
       isStopErp = false;
+      isStopKp = false;
+      isStopKd = false;
       isInitialJointPosition = false;
       isFudgeFactor = false;
-      provideFeedback = false;
-      cfmDamping = false;
+      isProvideFeedback = false;
+      isImplicitSpringDamper = false;
       blobs.clear();
 
       dampingFactor = 0;
+      maxContacts = 0;
       maxVel = 0;
       minDepth = 0;
       mu1 = 0;
@@ -66,16 +71,23 @@ namespace sdf
       laserRetro = 101;
       stopCfm = 0;
       stopErp = 0.1;
+      stopKp = 100000000;
+      stopKd = 1;
       initialJointPosition = 0;
       fudgeFactor = 1;
+
+      provideFeedback = false;
+      implicitSpringDamper = false;
     };
 
     private: SDFExtension(const SDFExtension &ge)
     {
       material = ge.material;
+      visual_blobs = ge.visual_blobs;
       setStaticFlag = ge.setStaticFlag;
       gravity = ge.gravity;
       isDampingFactor = ge.isDampingFactor;
+      isMaxContacts = ge.isMaxContacts;
       isMaxVel = ge.isMaxVel;
       isMinDepth = ge.isMinDepth;
       fdir1 = ge.fdir1;
@@ -85,17 +97,22 @@ namespace sdf
       isKd = ge.isKd;
       selfCollide = ge.selfCollide;
       isLaserRetro = ge.isLaserRetro;
+      isStopKp = ge.isStopKp;
+      isStopKd = ge.isStopKd;
       isStopCfm = ge.isStopCfm;
       isStopErp = ge.isStopErp;
       isInitialJointPosition = ge.isInitialJointPosition;
       isFudgeFactor = ge.isFudgeFactor;
+      isProvideFeedback = ge.isProvideFeedback;
+      isImplicitSpringDamper = ge.isImplicitSpringDamper;
       provideFeedback = ge.provideFeedback;
-      cfmDamping = ge.cfmDamping;
+      implicitSpringDamper = ge.implicitSpringDamper;
       oldLinkName = ge.oldLinkName;
       reductionTransform = ge.reductionTransform;
       blobs = ge.blobs;
 
       dampingFactor = ge.dampingFactor;
+      maxContacts = ge.maxContacts;
       maxVel = ge.maxVel;
       minDepth = ge.minDepth;
       mu1 = ge.mu1;
@@ -103,6 +120,8 @@ namespace sdf
       kp = ge.kp;
       kd = ge.kd;
       laserRetro = ge.laserRetro;
+      stopKp = ge.stopKp;
+      stopKd = ge.stopKd;
       stopCfm = ge.stopCfm;
       stopErp = ge.stopErp;
       initialJointPosition = ge.initialJointPosition;
@@ -115,12 +134,15 @@ namespace sdf
 
     // visual
     public: std::string material;
+    public: std::vector<boost::shared_ptr<TiXmlElement> > visual_blobs;
 
     // body, default off
     public: bool setStaticFlag;
     public: bool gravity;
     public: bool isDampingFactor;
     public: double dampingFactor;
+    public: bool isMaxContacts;
+    public: int maxContacts;
     public: bool isMaxVel;
     public: double maxVel;
     public: bool isMinDepth;
@@ -137,11 +159,15 @@ namespace sdf
     // joint, joint limit dynamics
     public: bool isStopCfm, isStopErp, isInitialJointPosition, isFudgeFactor;
     public: double stopCfm, stopErp, initialJointPosition, fudgeFactor;
+    public: bool isProvideFeedback;
     public: bool provideFeedback;
-    public: bool cfmDamping;
+    public: bool isImplicitSpringDamper;
+    public: bool implicitSpringDamper;
+    private: bool isStopKp, isStopKd;
+    private: double stopKp, stopKd;
 
     // blobs into body or robot
-    public: std::vector<TiXmlElement*> blobs;
+    public: std::vector<boost::shared_ptr<TiXmlElement> > blobs;
 
     friend class URDF2SDF;
   };
