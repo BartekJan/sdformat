@@ -21,7 +21,7 @@
 
 #include "sdf/parser.hh"
 #include "sdf/Assert.hh"
-#include "sdf/SDF.hh"
+#include "sdf/SDFImpl.hh"
 #include "sdf/sdf_config.h"
 
 using namespace sdf;
@@ -51,7 +51,7 @@ std::string sdf::findFile(const std::string &_filename, bool _searchLocalPath,
   for (URIPathMap::iterator iter = g_uriPathMap.begin();
        iter != g_uriPathMap.end(); ++iter)
   {
-    // Check to see if the URI in the global map is the first part of the 
+    // Check to see if the URI in the global map is the first part of the
     // given filename
     if (_filename.find(iter->first) == 0)
     {
@@ -79,6 +79,21 @@ std::string sdf::findFile(const std::string &_filename, bool _searchLocalPath,
   if (boost::filesystem::exists(path))
     return path.string();
 
+  // Next check SDF_PATH environment variable
+  char *pathCStr = getenv("SDF_PATH");
+  if (pathCStr)
+  {
+    std::vector<std::string> paths;
+    boost::split(paths, pathCStr, boost::is_any_of(":"));
+    for (std::vector<std::string>::iterator iter = paths.begin();
+         iter != paths.end(); ++iter)
+    {
+      path = boost::filesystem::path(*iter) / _filename;
+      if (boost::filesystem::exists(path))
+        return path.string();
+    }
+  }
+
   // Next check to see if the given file exists.
   path = boost::filesystem::path(_filename);
   if (boost::filesystem::exists(path))
@@ -98,7 +113,14 @@ std::string sdf::findFile(const std::string &_filename, bool _searchLocalPath,
   // flag has been set
   if (_useCallback)
   {
-    return g_findFileCB(_filename);
+    if (!g_findFileCB)
+    {
+      sdferr << "Tried to use callback in sdf::findFile(), but the callback "
+        "is empty.  Did you call sdf::setFindCallback()?";
+      return std::string();
+    }
+    else
+      return g_findFileCB(_filename);
   }
 
   return std::string();
@@ -117,7 +139,7 @@ void sdf::addURIPath(const std::string &_uri, const std::string &_path)
   {
     boost::filesystem::path path = *iter;
 
-    // Only add valid paths 
+    // Only add valid paths
     if (!(*iter).empty() && boost::filesystem::exists(path) &&
         boost::filesystem::is_directory(path))
     {
@@ -753,8 +775,11 @@ ElementPtr Element::AddElement(const std::string &_name)
       for (iter2 = elem->elementDescriptions.begin();
            iter2 != elem->elementDescriptions.end(); ++iter2)
       {
+        // Add only required child element
         if ((*iter2)->GetRequired() == "1")
+        {
           elem->AddElement((*iter2)->name);
+        }
       }
 
       return this->elements.back();
@@ -767,6 +792,12 @@ ElementPtr Element::AddElement(const std::string &_name)
 /////////////////////////////////////////////////
 void Element::ClearElements()
 {
+  for (sdf::ElementPtr_V::iterator iter = this->elements.begin();
+      iter != this->elements.end(); ++iter)
+  {
+    (*iter)->ClearElements();
+  }
+
   this->elements.clear();
 }
 
@@ -792,25 +823,27 @@ void Element::Update()
 /////////////////////////////////////////////////
 void Element::Reset()
 {
-  this->parent.reset();
-
   for (ElementPtr_V::iterator iter = this->elements.begin();
       iter != this->elements.end(); ++iter)
   {
-    (*iter)->Reset();
+    if (*iter)
+      (*iter)->Reset();
     (*iter).reset();
   }
 
   for (ElementPtr_V::iterator iter = this->elementDescriptions.begin();
       iter != this->elementDescriptions.end(); ++iter)
   {
-    (*iter)->Reset();
+    if (*iter)
+      (*iter)->Reset();
     (*iter).reset();
   }
   this->elements.clear();
   this->elementDescriptions.clear();
 
   this->value.reset();
+
+  this->parent.reset();
 }
 
 /////////////////////////////////////////////////
@@ -1028,7 +1061,7 @@ void SDF::PrintDoc()
   std::cout << "<div style='padding:4px'>\n"
             << "<h1>SDF " << SDF::version << "</h1>\n";
 
-  std::cout << "<p>The Simulation Description Format (SDF) is an XML file "
+  std::cout << "<p>The Robot Modeling Language (SDF) is an XML file "
             << "format used to describe all the elements in a simulation "
             << "environment.\n</p>";
   std::cout << "<h3>Usage</h3>\n";
@@ -1108,6 +1141,7 @@ std::string SDF::ToString() const
 {
   std::ostringstream stream;
 
+  stream << "<?xml version='1.0'?>\n";
   if (this->root->GetName() != "sdf")
     stream << "<sdf version='" << SDF::version << "'>\n";
 
@@ -1128,5 +1162,3 @@ void SDF::SetFromString(const std::string &_sdfData)
     sdferr << "Unable to parse sdf string[" << _sdfData << "]\n";
   }
 }
-
-
