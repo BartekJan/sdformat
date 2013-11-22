@@ -98,17 +98,18 @@ macro (sdf_build_tests)
   # Build all the tests
   foreach(GTEST_SOURCE_file ${ARGN})
     string(REGEX REPLACE ".cc" "" BINARY_NAME ${GTEST_SOURCE_file})
+    set(BINARY_NAME ${TEST_TYPE}_${BINARY_NAME})
     add_executable(${BINARY_NAME} ${GTEST_SOURCE_file})
 
     add_dependencies(${BINARY_NAME}
-      gtest gtest_main sdf
+      gtest gtest_main sdformat
       ${tinyxml_libraries}
       )
   
     target_link_libraries(${BINARY_NAME}
       libgtest.a
       libgtest_main.a
-      sdf
+      sdformat
       pthread
       ${tinyxml_libraries}
       )
