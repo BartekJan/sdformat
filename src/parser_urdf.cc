@@ -34,7 +34,7 @@ typedef boost::shared_ptr<urdf::Link> UrdfLinkPtr;
 typedef boost::shared_ptr<const urdf::Link> ConstUrdfLinkPtr;
 typedef boost::shared_ptr<TiXmlElement> TiXmlElementPtr;
 typedef boost::shared_ptr<SDFExtension> SDFExtensionPtr;
-typedef std::map<std::string, std::vector<SDFExtensionPtr> > 
+typedef std::map<std::string, std::vector<SDFExtensionPtr> >
   StringSDFExtensionPtrMap;
 
 /// create SDF geometry block based on URDF
@@ -141,19 +141,19 @@ void PrintCollisionGroups(UrdfLinkPtr _link);
 /// reduced fixed joints:  apply appropriate frame updates in joint
 ///   inside urdf extensions when doing fixed joint reduction
 void ReduceSDFExtensionJointFrameReplace(
-    std::vector<TiXmlElementPtr>::iterator _blobIt, 
+    std::vector<TiXmlElementPtr>::iterator _blobIt,
     UrdfLinkPtr _link);
 
 /// reduced fixed joints:  apply appropriate frame updates in gripper
 ///   inside urdf extensions when doing fixed joint reduction
 void ReduceSDFExtensionGripperFrameReplace(
-    std::vector<TiXmlElementPtr>::iterator _blobIt, 
+    std::vector<TiXmlElementPtr>::iterator _blobIt,
     UrdfLinkPtr _link);
 
 /// reduced fixed joints:  apply appropriate frame updates in projector
 /// inside urdf extensions when doing fixed joint reduction
 void ReduceSDFExtensionProjectorFrameReplace(
-    std::vector<TiXmlElementPtr>::iterator _blobIt, 
+    std::vector<TiXmlElementPtr>::iterator _blobIt,
     UrdfLinkPtr _link);
 
 /// reduced fixed joints:  apply appropriate frame updates in plugins
@@ -166,7 +166,7 @@ void ReduceSDFExtensionPluginFrameReplace(
 /// reduced fixed joints:  apply appropriate frame updates in urdf
 ///   extensions when doing fixed joint reduction
 void ReduceSDFExtensionContactSensorFrameReplace(
-    std::vector<TiXmlElementPtr>::iterator _blobIt, 
+    std::vector<TiXmlElementPtr>::iterator _blobIt,
     UrdfLinkPtr _link);
 
 /// \brief reduced fixed joints:  apply appropriate updates to urdf
@@ -1134,17 +1134,17 @@ void URDF2SDF::ParseSDFExtension(TiXmlDocument &_urdfXml)
       {
         sdf->material = GetKeyValueAsString(childElem);
       }
-      else if (childElem->ValueStr() == "visual") 
+      else if (childElem->ValueStr() == "visual")
       {
         // a place to store converted doc
-        for (TiXmlElement* e = childElem->FirstChildElement(); e; 
-            e = e->NextSiblingElement()) 
+        for (TiXmlElement* e = childElem->FirstChildElement(); e;
+            e = e->NextSiblingElement())
         {
           TiXmlDocument xmlNewDoc;
 
           std::ostringstream origStream;
           origStream << *e;
-          sdfdbg << "visual extension [" << origStream.str() << "] not " << 
+          sdfdbg << "visual extension [" << origStream.str() << "] not " <<
                    "converted from URDF, probably already in SDF format.";
           xmlNewDoc.Parse(origStream.str().c_str());
 
@@ -1296,16 +1296,22 @@ void URDF2SDF::ParseSDFExtension(TiXmlDocument &_urdfXml)
       {
         sdfdbg << "do nothing with canonicalBody\n";
       }
-      else if (childElem->ValueStr() == "cfmDamping")
+      else if (childElem->ValueStr() == "cfmDamping" ||
+               childElem->ValueStr() == "implicitSpringDamper")
       {
-        sdf->isCFMDamping = true;
+        if (childElem->ValueStr() == "cfmDamping")
+          sdfwarn << "Note that cfmDamping is being deprecated by "
+                  << "implicitSpringDamper, please replace instances "
+                  << "of cfmDamping with implicitSpringDamper in your model.\n";
+
+        sdf->isImplicitSpringDamper = true;
         std::string valueStr = GetKeyValueAsString(childElem);
 
         if (lowerStr(valueStr) == "true" || lowerStr(valueStr) == "yes" ||
             valueStr == "1")
-          sdf->cfmDamping = true;
+          sdf->implicitSpringDamper = true;
         else
-          sdf->cfmDamping = false;
+          sdf->implicitSpringDamper = false;
       }
       else
       {
@@ -1319,7 +1325,7 @@ void URDF2SDF::ParseSDFExtension(TiXmlDocument &_urdfXml)
         xmlNewDoc.Parse(stream.str().c_str());
 
         // save all unknown stuff in a vector of blobs
-        TiXmlElementPtr blob(new TiXmlElement(*xmlNewDoc.FirstChildElement()));              
+        TiXmlElementPtr blob(new TiXmlElement(*xmlNewDoc.FirstChildElement()));
         sdf->blobs.push_back(blob);
       }
     }
@@ -1340,9 +1346,9 @@ void InsertSDFExtensionCollision(TiXmlElement *_elem,
     for (std::vector<SDFExtensionPtr>::iterator ge = sdfIt->second.begin();
         ge != sdfIt->second.end(); ++ge)
     {
-      if (((*ge)->oldLinkName == _linkName) || 
-          (_elem->Attribute("name") && 
-           (std::string(_elem->Attribute("name")) == 
+      if (((*ge)->oldLinkName == _linkName) ||
+          (_elem->Attribute("name") &&
+           (std::string(_elem->Attribute("name")) ==
            _linkName + g_collisionExt + std::string("_") + (*ge)->oldLinkName)))
       {
         TiXmlElement *surface = new TiXmlElement("surface");
@@ -1423,11 +1429,11 @@ void InsertSDFExtensionVisual(TiXmlElement *_elem,
         }
 
         // insert any blobs (including visual plugins)
-        if (!(*ge)->visual_blobs.empty()) 
+        if (!(*ge)->visual_blobs.empty())
         {
-          std::vector<TiXmlElementPtr>::iterator blob; 
+          std::vector<TiXmlElementPtr>::iterator blob;
           for (blob = (*ge)->visual_blobs.begin();
-              blob != (*ge)->visual_blobs.end(); ++blob) 
+              blob != (*ge)->visual_blobs.end(); ++blob)
           {
             _elem->LinkEndChild((*blob)->Clone());
           }
@@ -1545,18 +1551,32 @@ void InsertSDFExtensionJoint(TiXmlElement *_elem,
         if ((*ge)->isProvideFeedback)
         {
           if ((*ge)->provideFeedback)
+          {
+            AddKeyValue(physics, "provide_feedback", "true");
             AddKeyValue(physicsOde, "provide_feedback", "true");
+          }
           else
+          {
+            AddKeyValue(physics, "provide_feedback", "false");
             AddKeyValue(physicsOde, "provide_feedback", "false");
+          }
         }
 
-        // insert cfmDamping
-        if ((*ge)->isCFMDamping)
+        // insert implicitSpringDamper
+        if ((*ge)->isImplicitSpringDamper)
         {
-          if ((*ge)->cfmDamping)
+          if ((*ge)->implicitSpringDamper)
+          {
+            AddKeyValue(physicsOde, "implicit_spring_damper", "true");
+            /// \TODO: deprecating cfm_damping, transitional tag below
             AddKeyValue(physicsOde, "cfm_damping", "true");
+          }
           else
+          {
+            AddKeyValue(physicsOde, "implicit_spring_damper", "false");
+            /// \TODO: deprecating cfm_damping, transitional tag below
             AddKeyValue(physicsOde, "cfm_damping", "false");
+          }
         }
 
         // insert fudgeFactor
@@ -1612,9 +1632,6 @@ void InsertSDFExtensionRobot(TiXmlElement *_elem)
 void CreateGeometry(TiXmlElement* _elem,
     boost::shared_ptr<urdf::Geometry> _geom)
 {
-  int sizeCount;
-  double sizeVals[3];
-
   TiXmlElement *sdfGeometry = new TiXmlElement("geometry");
 
   std::string type;
@@ -1624,10 +1641,11 @@ void CreateGeometry(TiXmlElement* _elem,
   {
     case urdf::Geometry::BOX:
       type = "box";
-      sizeCount = 3;
       {
         boost::shared_ptr<const urdf::Box> box;
         box = boost::dynamic_pointer_cast< const urdf::Box >(_geom);
+        int sizeCount = 3;
+        double sizeVals[3];
         sizeVals[0] = box->dim.x;
         sizeVals[1] = box->dim.y;
         sizeVals[2] = box->dim.z;
@@ -1638,7 +1656,6 @@ void CreateGeometry(TiXmlElement* _elem,
       break;
     case urdf::Geometry::CYLINDER:
       type = "cylinder";
-      sizeCount = 2;
       {
         boost::shared_ptr<const urdf::Cylinder> cylinder;
         cylinder = boost::dynamic_pointer_cast<const urdf::Cylinder >(_geom);
@@ -1651,7 +1668,6 @@ void CreateGeometry(TiXmlElement* _elem,
       break;
     case urdf::Geometry::SPHERE:
       type = "sphere";
-      sizeCount = 1;
       {
         boost::shared_ptr<const urdf::Sphere> sphere;
         sphere = boost::dynamic_pointer_cast<const urdf::Sphere >(_geom);
@@ -1662,13 +1678,9 @@ void CreateGeometry(TiXmlElement* _elem,
       break;
     case urdf::Geometry::MESH:
       type = "mesh";
-      sizeCount = 3;
       {
         boost::shared_ptr<const urdf::Mesh> mesh;
         mesh = boost::dynamic_pointer_cast<const urdf::Mesh >(_geom);
-        sizeVals[0] = mesh->scale.x;
-        sizeVals[1] = mesh->scale.y;
-        sizeVals[2] = mesh->scale.z;
         geometryType = new TiXmlElement(type);
         AddKeyValue(geometryType, "scale", Vector32Str(mesh->scale));
         // do something more to meshes
@@ -1716,7 +1728,6 @@ void CreateGeometry(TiXmlElement* _elem,
       }
       break;
     default:
-      sizeCount = 0;
       sdfwarn << "Unknown body type: [" << _geom->type
         << "] skipped in geometry\n";
       break;
@@ -1949,7 +1960,7 @@ void ReduceSDFExtensionFrameReplace(SDFExtensionPtr _ge,
   //         <collision>base_footprint_collision</collision>
   sdfdbg << "  STRING REPLACE: instances of _link name ["
         << linkName << "] with [" << newLinkName << "]\n";
-  for (std::vector<TiXmlElementPtr>::iterator blobIt = 
+  for (std::vector<TiXmlElementPtr>::iterator blobIt =
          _ge->blobs.begin();
          blobIt != _ge->blobs.end(); ++blobIt)
   {
@@ -1977,7 +1988,7 @@ void ReduceSDFExtensionFrameReplace(SDFExtensionPtr _ge,
 ////////////////////////////////////////////////////////////////////////////////
 void ReduceSDFExtensionsTransform(SDFExtensionPtr _ge)
 {
-  for (std::vector<TiXmlElementPtr>::iterator blobIt = 
+  for (std::vector<TiXmlElementPtr>::iterator blobIt =
          _ge->blobs.begin();
          blobIt != _ge->blobs.end(); ++blobIt)
   {
@@ -2791,7 +2802,7 @@ void ReduceSDFExtensionProjectorTransformReduction(
 
 ////////////////////////////////////////////////////////////////////////////////
 void ReduceSDFExtensionContactSensorFrameReplace(
-    std::vector<TiXmlElementPtr>::iterator _blobIt, 
+    std::vector<TiXmlElementPtr>::iterator _blobIt,
     UrdfLinkPtr _link)
 {
   std::string linkName = _link->name;
@@ -2829,7 +2840,7 @@ void ReduceSDFExtensionContactSensorFrameReplace(
 
 ////////////////////////////////////////////////////////////////////////////////
 void ReduceSDFExtensionPluginFrameReplace(
-    std::vector<TiXmlElementPtr>::iterator _blobIt, 
+    std::vector<TiXmlElementPtr>::iterator _blobIt,
     UrdfLinkPtr _link,
     const std::string &_pluginName, const std::string &_elementName,
     sdf::Pose _reductionTransform)
@@ -2912,7 +2923,7 @@ void ReduceSDFExtensionPluginFrameReplace(
 
 ////////////////////////////////////////////////////////////////////////////////
 void ReduceSDFExtensionProjectorFrameReplace(
-    std::vector<TiXmlElementPtr>::iterator _blobIt, 
+    std::vector<TiXmlElementPtr>::iterator _blobIt,
     UrdfLinkPtr _link)
 {
   std::string linkName = _link->name;
@@ -2960,7 +2971,7 @@ void ReduceSDFExtensionProjectorFrameReplace(
 
 ////////////////////////////////////////////////////////////////////////////////
 void ReduceSDFExtensionGripperFrameReplace(
-    std::vector<TiXmlElementPtr>::iterator _blobIt, 
+    std::vector<TiXmlElementPtr>::iterator _blobIt,
     UrdfLinkPtr _link)
 {
   std::string linkName = _link->name;
@@ -3001,7 +3012,7 @@ void ReduceSDFExtensionGripperFrameReplace(
 
 ////////////////////////////////////////////////////////////////////////////////
 void ReduceSDFExtensionJointFrameReplace(
-    std::vector<TiXmlElementPtr>::iterator _blobIt, 
+    std::vector<TiXmlElementPtr>::iterator _blobIt,
     UrdfLinkPtr _link)
 {
   std::string linkName = _link->name;
