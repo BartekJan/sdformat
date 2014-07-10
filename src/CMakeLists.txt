@@ -2,6 +2,7 @@ include (${sdf_cmake_dir}/SDFUtils.cmake)
 
 link_directories(
   ${PROJECT_BINARY_DIR}/test
+  ${tinyxml_LIBRARY_DIRS}
 )
 
 if (USE_EXTERNAL_URDF)
@@ -48,6 +49,9 @@ target_link_libraries(sdformat
   ${tinyxml_LIBRARIES}
   ${Boost_LIBRARIES}
 )
+
+message (STATUS "URDF_LIBRARY_DIRS=${URDF_LIBRARY_DIRS}")
+message (STATUS "URDF_LIBRARIES=${URDF_LIBRARIES}")
 
 if (USE_EXTERNAL_URDF)
   target_link_libraries(sdformat ${URDF_LIBRARIES})
