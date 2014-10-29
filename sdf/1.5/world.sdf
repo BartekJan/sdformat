@@ -28,5 +28,4 @@
 
   <include filename="state.sdf" required="*"/>
   <include filename="population.sdf" required="*"/>
-
 </element> <!-- End World -->
