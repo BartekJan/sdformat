@@ -20,6 +20,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include "sdf/ruby.hh"
 #include "sdf/Console.hh"
 #include "sdf/Converter.hh"
 #include "sdf/SDFImpl.hh"
@@ -31,6 +32,68 @@
 
 namespace sdf
 {
+/// \internal
+// Class to handle Ruby initialization.
+class RubyInitializer
+{
+  /// \brief Constructor
+  public: RubyInitializer()
+  {
+    // Initialize ruby.
+    RUBY_INIT_STACK;
+    ruby_init();
+    ruby_init_loadpath();
+    rb_set_safe_level(0);
+    ruby_script("ruby");
+  }
+
+  /// \brief Destructor
+  public: virtual ~RubyInitializer()
+  {
+    ruby_finalize();
+  }
+
+  /// \brief Parse a string using ERB.
+  /// \param[in] _string String to parse.
+  /// \param[out] _result ERB parsed string.
+  /// \return True on success.
+  public: bool erbString(const std::string &_string, std::string &_result)
+  {
+    std::string cmd ="begin; require 'erb'; ERB.new(%Q{" +
+      _string + "}).result; rescue; end";
+
+    // Run the ERB parser
+    VALUE ret = rb_eval_string_protect(cmd.c_str(), 0);
+
+    // Convert ruby string to std::string
+#if RUBY_API_VERSION_CODE < 10900
+    if (RSTRING(ret)->ptr != NULL)
+    {
+      _result.assign(
+          RSTRING(ret)->ptr, RSTRING(ret)->len);
+    }
+#else
+    if (RSTRING(ret)->as.heap.ptr != NULL)
+    {
+      _result.assign(RSTRING(ret)->as.heap.ptr,
+          RSTRING(ret)->as.heap.len);
+    }
+#endif
+    else
+    {
+      sdferr << "Unable to parse string["
+        << _string << "] using ERB.\n";
+      return false;
+    }
+
+    return true;
+  }
+};
+
+// Instance of RubyInitializer that is constructed at startup.
+static RubyInitializer g_rubyInit;
+
+
 //////////////////////////////////////////////////
 bool init(SDFPtr _sdf)
 {
@@ -261,7 +324,15 @@ bool readFile(const std::string &_filename, SDFPtr _sdf)
     return false;
   }
 
-  xmlDoc.LoadFile(filename);
+  // Parse using ERB
+  std::string erbParsed;
+  if (!erbFile(filename, erbParsed))
+  {
+    sdferr << "Failed to ERB parse file[" << _filename << "]\n";
+    return false;
+  }
+
+  xmlDoc.Parse(erbParsed.c_str());
   if (readDoc(&xmlDoc, _sdf, filename))
     return true;
   else
@@ -286,8 +357,16 @@ bool readFile(const std::string &_filename, SDFPtr _sdf)
 //////////////////////////////////////////////////
 bool readString(const std::string &_xmlString, SDFPtr _sdf)
 {
+  // Parse using ERB
+  std::string erbParsed;
+  if (!erbString(_xmlString, erbParsed))
+  {
+    sdferr << "Unable to parse XML string using ERB\n";
+    return false;
+  }
+
   TiXmlDocument xmlDoc;
-  xmlDoc.Parse(_xmlString.c_str());
+  xmlDoc.Parse(erbParsed.c_str());
   if (readDoc(&xmlDoc, _sdf, "data-string"))
     return true;
   else
@@ -312,8 +391,16 @@ bool readString(const std::string &_xmlString, SDFPtr _sdf)
 //////////////////////////////////////////////////
 bool readString(const std::string &_xmlString, ElementPtr _sdf)
 {
+  // Parse using ERB
+  std::string erbParsed;
+  if (!erbString(_xmlString, erbParsed))
+  {
+    sdferr << "Unable to parse XML string using ERB\n";
+    return false;
+  }
+
   TiXmlDocument xmlDoc;
-  xmlDoc.Parse(_xmlString.c_str());
+  xmlDoc.Parse(erbParsed.c_str());
   if (readDoc(&xmlDoc, _sdf, "data-string"))
     return true;
   else
@@ -872,5 +959,39 @@ void addNestedModel(ElementPtr _sdf, ElementPtr _includeSDF)
     }
     elem = nextElem;
   }
+}
+
+//////////////////////////////////////////////////
+bool erbString(const std::string &_string, std::string &_result)
+{
+  // Short circuit if there are no ERB tags
+  if (_string.find("<%") == std::string::npos)
+  {
+    _result = _string;
+    return true;
+  }
+
+  return g_rubyInit.erbString(_string, _result);
+}
+
+//////////////////////////////////////////////////
+bool erbFile(const std::string &_filename, std::string &_result)
+{
+  if (_filename.empty())
+    return false;
+
+  // Make sure the file exists
+  if (!boost::filesystem::exists(boost::filesystem::path(_filename)))
+  {
+    sdferr << "Error: File doesn't exist[" << _filename << "]\n";
+    return false;
+  }
+
+  // Read file data
+  std::ifstream in(_filename.c_str());
+  std::string data((std::istreambuf_iterator<char>(in)),
+                    std::istreambuf_iterator<char>());
+
+  return erbString(data, _result);
 }
 }
