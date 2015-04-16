@@ -14,10 +14,6 @@
  * limitations under the License.
  *
 */
-/* Desc: Parameter class
- * Author: Nate Koenig
- * Date: 14 Aug 2008
- */
 
 #include <math.h>
 #include <locale.h>
@@ -225,7 +221,7 @@ void Param::Update()
     {
       boost::apply_visitor(any_set(this->updateFunc()), this->value);
     }
-    catch(boost::bad_lexical_cast &e)
+    catch(boost::bad_lexical_cast &/*e*/)
     {
       sdferr << "Unable to set value using Update for key["
         << this->key << "]\n";
