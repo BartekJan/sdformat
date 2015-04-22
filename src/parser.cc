@@ -219,11 +219,18 @@ bool initXml(TiXmlElement *_xml, ElementPtr _sdf)
       child; child = child->NextSiblingElement("element"))
   {
     const char *copyDataString = child->Attribute("copy_data");
+    const char *nestedSDFString = child->Attribute("nested_sdf");
     if (copyDataString &&
         (std::string(copyDataString) == "true" ||
          std::string(copyDataString) == "1"))
     {
       _sdf->SetCopyChildren(true);
+    }
+    else if (nestedSDFString &&
+        (std::string(nestedSDFString) == "true" ||
+         std::string(nestedSDFString) == "1"))
+    {
+      _sdf->SetNestedSDF(true);
     }
     else
     {
@@ -453,6 +460,17 @@ bool readXml(TiXmlElement *_xml, ElementPtr _sdf)
   if (_xml->GetText() != NULL && _sdf->GetValue())
   {
     _sdf->GetValue()->SetFromString(_xml->GetText());
+  }
+
+  // check for nested model
+  if (_sdf->GetNestedSDF())
+  {
+    ElementPtr modelSDF;
+    modelSDF.reset(new Element);
+    // assume nested model for now.
+    initFile("model.sdf", modelSDF);
+    _sdf->RemoveFromParent();
+    _sdf->Copy(modelSDF);
   }
 
   TiXmlAttribute *attribute = _xml->FirstAttribute();
@@ -719,7 +737,7 @@ bool readXml(TiXmlElement *_xml, ElementPtr _sdf)
       }
     }
 
-    // Chek that all required elements have been set
+    // Check that all required elements have been set
     unsigned int descCounter = 0;
     for (descCounter = 0;
          descCounter != _sdf->GetElementDescriptionCount(); ++descCounter)
