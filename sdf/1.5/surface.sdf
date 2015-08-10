@@ -88,6 +88,17 @@
       <description>Bitmask for collision filtering. This will override collide_without_contact</description>
     </element>
 
+    <element name="elastic_modulus" type="double" default="-1" required="0">
+      <description>
+        Young's Modulus in SI derived unit Pascal.
+        Defaults to -1.  If value is less or equal to zero,
+        contact using elastic modulus is disabled.
+      </description>
+    </element>
+    <element name="elastic_modulus_reference_length" type="double" default="0" required="0">
+      <description>Reference length fo Young's Modulus.</description>
+    </element>
+
     <element name="ode" required="0">
       <description>ODE contact parameters</description>
       <element name="soft_cfm" type="double" default="0" required="0">
