@@ -25,6 +25,7 @@ Element::Element()
   : dataPtr(new ElementPrivate)
 {
   this->dataPtr->copyChildren = false;
+  this->dataPtr->nestedSDF = false;
 }
 
 /////////////////////////////////////////////////
@@ -109,6 +110,18 @@ bool Element::GetCopyChildren() const
 }
 
 /////////////////////////////////////////////////
+void Element::SetNestedSDF(bool _value)
+{
+  this->dataPtr->nestedSDF = _value;
+}
+
+/////////////////////////////////////////////////
+bool Element::GetNestedSDF() const
+{
+  return this->dataPtr->nestedSDF;
+}
+
+/////////////////////////////////////////////////
 void Element::AddValue(const std::string &_type,
     const std::string &_defaultValue, bool _required,
     const std::string &_description)
@@ -144,6 +157,7 @@ ElementPtr Element::Clone() const
   clone->dataPtr->required = this->dataPtr->required;
   // clone->parent = this->dataPtr->parent;
   clone->dataPtr->copyChildren = this->dataPtr->copyChildren;
+  clone->dataPtr->nestedSDF = this->dataPtr->nestedSDF;
   clone->dataPtr->includeFilename = this->dataPtr->includeFilename;
 
   Param_V::const_iterator aiter;
@@ -180,6 +194,7 @@ void Element::Copy(const ElementPtr _elem)
   this->dataPtr->description = _elem->GetDescription();
   this->dataPtr->required = _elem->GetRequired();
   this->dataPtr->copyChildren = _elem->GetCopyChildren();
+  this->dataPtr->nestedSDF = _elem->GetNestedSDF();
   this->dataPtr->includeFilename = _elem->dataPtr->includeFilename;
 
   for (Param_V::iterator iter = _elem->dataPtr->attributes.begin();
@@ -242,6 +257,9 @@ void Element::PrintDescription(const std::string &_prefix)
 
   if (this->GetCopyChildren())
     std::cout << _prefix << "  <element copy_data ='true' required ='*'/>\n";
+
+  if (this->GetNestedSDF())
+    std::cout << _prefix << "  <element nested_sdf ='true' required ='*'/>\n";
 
   ElementPtr_V::iterator eiter;
   for (eiter = this->dataPtr->elementDescriptions.begin();
