@@ -3,6 +3,7 @@ set (sdfs
   altimeter.sdf
   audio_source.sdf
   audio_sink.sdf
+  battery.sdf
   box_shape.sdf
   camera.sdf
   collision.sdf
@@ -20,6 +21,7 @@ set (sdfs
   joint.sdf
   light.sdf
   link.sdf
+  logical_camera.sdf
   magnetometer.sdf
   material.sdf
   mesh_shape.sdf
