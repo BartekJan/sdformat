@@ -816,7 +816,7 @@ void Element::RemoveChild(ElementPtr _child)
 }
 
 /////////////////////////////////////////////////
-boost::any Element::GetAny(const std::string &_key)
+/*boost::any Element::GetAny(const std::string &_key)
 {
   boost::any result;
   if (_key.empty() && this->dataPtr->value)
@@ -843,4 +843,4 @@ boost::any Element::GetAny(const std::string &_key)
       sdferr << "Unable to find value for key [" << _key << "]\n";
   }
   return result;
-}
+}*/
