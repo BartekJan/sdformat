@@ -6,6 +6,11 @@
      * [Pull request 215](https://bitbucket.org/osrf/sdformat/pull-request/215)
 1. Added torsional friction to SDF
      * [Pull request 211](https://bitbucket.org/osrf/sdformat/pull-request/211)
+     * [Pull request 217](https://bitbucket.org/osrf/sdformat/pull-request/217)
+
+1. Added support for nested models
+     * [Pull request 221](https://bitbucket.org/osrf/sdformat/pull-request/221)
+     * [Pull request 223](https://bitbucket.org/osrf/sdformat/pull-request/223)
 
 ### SDFormat 3.1.1 (2015-08-03)
 
@@ -19,6 +24,8 @@
 
 ### SDFormat 3.0.0 (2015-07-24)
 
+1. Added battery to SDF
+     * [Pull request 204](https://bitbucket.org/osrf/sdformat/pull-request/204)
 1. Added altimeter sensor to SDF
      * [Pull request 197](https://bitbucket.org/osrf/sdformat/pull-request/197)
 1. Added magnetometer sensor to SDF
