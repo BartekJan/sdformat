@@ -232,6 +232,7 @@ void Element::PrintDescription(const std::string &_prefix)
   if (this->GetCopyChildren())
     std::cout << _prefix << "  <element copy_data ='true' required ='*'/>\n";
 
+
   std::string refSDF = this->ReferenceSDF();
   if (!refSDF.empty())
   {
