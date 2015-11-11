@@ -809,6 +809,10 @@ void Element::RemoveChild(ElementPtr _child)
 /////////////////////////////////////////////////
 boost::any Element::GetAny(const std::string &_key)
 {
+#ifndef _WIN32
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
   boost::any result;
   if (_key.empty() && this->dataPtr->value)
   {
@@ -834,4 +838,7 @@ boost::any Element::GetAny(const std::string &_key)
       sdferr << "Unable to find value for key [" << _key << "]\n";
   }
   return result;
+#ifndef _WIN32
+#pragma GCC diagnostic pop
+#endif
 }
