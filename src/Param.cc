@@ -15,38 +15,14 @@
  *
 */
 
+#include <algorithm>
+#include <utility>
+
 #include <math.h>
 #include <locale.h>
-#include <boost/algorithm/string.hpp>
 #include "sdf/Param.hh"
 
 using namespace sdf;
-
-class string_set : public boost::static_visitor<>
-{
-  public: string_set(const std::string &_value)
-          {this->value = _value;}
-
-  public: template <typename T>
-          void operator()(T & _operand) const
-          {
-            _operand = boost::lexical_cast<T>(this->value);
-          }
-  public: std::string value;
-};
-
-class any_set : public boost::static_visitor<>
-{
-  public: any_set(const boost::any &_value)
-          {this->value = _value;}
-
-  public: template <typename T>
-          void operator()(T & _operand) const
-          {
-            _operand = boost::any_cast<T>(this->value);
-          }
-  public: boost::any value;
-};
 
 //////////////////////////////////////////////////
 Param::Param(const std::string &_key, const std::string &_typeName,
@@ -334,17 +310,16 @@ bool Param::GetAny(boost::any &_anyVal) const
 //////////////////////////////////////////////////
 void Param::Update()
 {
-  if (this->dataPtr->updateFunc)
+  if (this->updateFunc)
   {
     try
     {
-      boost::apply_visitor(any_set(this->dataPtr->updateFunc()),
-      this->dataPtr->value);
+      this->value = this->updateFunc();
     }
-    catch(boost::bad_lexical_cast &/*e*/)
+    catch(...)
     {
       sdferr << "Unable to set value using Update for key["
-        << this->dataPtr->key << "]\n";
+             << this->dataPtr->key << "]\n";
     }
   }
 }
@@ -352,128 +327,19 @@ void Param::Update()
 //////////////////////////////////////////////////
 std::string Param::GetAsString() const
 {
-  return boost::lexical_cast<std::string>(this->dataPtr->value);
+  return this->value.String();
 }
 
 //////////////////////////////////////////////////
 std::string Param::GetDefaultAsString() const
 {
-  return boost::lexical_cast<std::string>(this->dataPtr->defaultValue);
-}
-
-//////////////////////////////////////////////////
-bool Param::SetFromString(const std::string &_value)
-{
-  // Under some circumstances, latin locales (es_ES or pt_BR) will return a
-  // comma for decimal position instead of a dot, making the conversion
-  // to fail. See bug #60 for more information. Force to use always C
-  setlocale(LC_NUMERIC, "C");
-
-  std::string str = _value;
-  boost::trim(str);
-
-  if (str.empty() && this->dataPtr->required)
-  {
-    sdferr << "Empty string used when setting a required parameter. Key["
-      << this->GetKey() << "]\n";
-    return false;
-  }
-  else if (str.empty())
-  {
-    this->dataPtr->value = this->dataPtr->defaultValue;
-    return true;
-  }
-
-  std::string tmp(str);
-  std::string lowerTmp(str);
-  std::transform(lowerTmp.begin(), lowerTmp.end(), lowerTmp.begin(), ::tolower);
-
-  // "true" and "false" doesn't work properly
-  if (lowerTmp == "true")
-    tmp = "1";
-  else if (lowerTmp == "false")
-    tmp = "0";
-
-  bool isHex = tmp.compare(0, 2, "0x") == 0;
-
-  try
-  {
-    // If the string is hex, try to use stoi and stoul, and then
-    // lexical cast as a last resort.
-    if (isHex)
-    {
-      if (this->dataPtr->typeName == "int")
-        this->dataPtr->value = std::stoi(tmp, NULL, 16);
-      else if (this->dataPtr->typeName == "unsigned int")
-      {
-        this->dataPtr->value = static_cast<unsigned int>(
-            std::stoul(tmp, NULL, 16));
-      }
-      else
-      {
-        boost::apply_visitor(string_set(tmp), this->dataPtr->value);
-      }
-    }
-    // Otherwise use stod, stof, and lexical cast
-    else
-    {
-      if (this->dataPtr->typeName == "int")
-        this->dataPtr->value = std::stoi(tmp, NULL, 10);
-      else if (this->dataPtr->typeName == "unsigned int")
-      {
-        this->dataPtr->value = static_cast<unsigned int>(
-            std::stoul(tmp, NULL, 10));
-      }
-      else if (this->dataPtr->typeName == "double")
-        this->dataPtr->value = std::stod(tmp);
-      else if (this->dataPtr->typeName == "float")
-        this->dataPtr->value = std::stof(tmp);
-      else
-        boost::apply_visitor(string_set(tmp), this->dataPtr->value);
-    }
-  }
-  // Catch invalid argument exception from std::stoi/stoul/stod/stof
-  catch(std::invalid_argument &)
-  {
-    sdferr << "Invalid argument. Unable to set value ["
-      << str << " ] for key["
-      << this->dataPtr->key << "].\n";
-    return false;
-  }
-  // Catch out of range exception from std::stoi/stoul/stod/stof
-  catch(std::out_of_range &)
-  {
-    sdferr << "Out of range. Unable to set value ["
-      << str << " ] for key["
-      << this->dataPtr->key << "].\n";
-    return false;
-  }
-  // Catch boost lexical cast exceptions
-  catch(boost::bad_lexical_cast &)
-  {
-    if (str == "inf" || str == "-inf")
-    {
-      // in this case, the parser complains, but seems to assign the
-      // right values
-      sdfmsg << "INFO [sdf::Param]: boost throws when lexical casting "
-        << "inf's, but the values are usually passed through correctly\n";
-    }
-    else
-    {
-      sdferr << "Unable to set value [" <<  str
-        << "] for key[" << this->dataPtr->key << "]\n";
-      return false;
-    }
-  }
-
-  this->dataPtr->set = true;
-  return this->dataPtr->set;
+  return this->defaultValue.String();
 }
 
 //////////////////////////////////////////////////
 void Param::Reset()
 {
-  this->dataPtr->value = this->dataPtr->defaultValue;
+  this->value = this->defaultValue;
   this->dataPtr->set = false;
 }
 
@@ -483,12 +349,6 @@ ParamPtr Param::Clone() const
   return ParamPtr(new Param(this->dataPtr->key, this->dataPtr->typeName,
       this->GetAsString(), this->dataPtr->required,
       this->dataPtr->description));
-}
-
-//////////////////////////////////////////////////
-const std::type_info &Param::GetType() const
-{
-  return this->dataPtr->value.type();
 }
 
 //////////////////////////////////////////////////
@@ -524,8 +384,9 @@ bool Param::GetRequired() const
 /////////////////////////////////////////////////
 Param &Param::operator=(const Param &_param)
 {
-  this->dataPtr->value = _param.dataPtr->value;
-  this->dataPtr->defaultValue  = _param.dataPtr->defaultValue;
+  this->value = _param.value;
+  this->defaultValue = _param.defaultValue;
+
   return *this;
 }
 
@@ -533,4 +394,81 @@ Param &Param::operator=(const Param &_param)
 bool Param::GetSet() const
 {
   return this->dataPtr->set;
+}
+
+//////////////////////////////////////////////////
+bool Param::SetFromString(const std::string &_value)
+{
+  // Under some circumstances, latin locales (es_ES or pt_BR) will return a
+  // comma for decimal position instead of a dot, making the conversion
+  // to fail. See bug #60 for more information. Force to use always C
+  setlocale(LC_NUMERIC, "C");
+
+  std::string str = _value;
+  sdf::trim(str);
+
+  if (str.empty() && this->dataPtr->required)
+  {
+    sdferr << "Empty string used when setting a required parameter. Key["
+      << this->GetKey() << "]\n";
+    return false;
+  }
+  else if (str.empty())
+  {
+    this->value = this->defaultValue;
+    return true;
+  }
+
+  std::string tmp(str);
+  std::string lowerTmp(str);
+  std::transform(lowerTmp.begin(), lowerTmp.end(),
+                 lowerTmp.begin(), ::tolower);
+
+  // "true" and "false" doesn't work properly
+  if (lowerTmp == "true")
+    tmp = "1";
+  else if (lowerTmp == "false")
+    tmp = "0";
+
+  try
+  {
+    if (this->value.Set(tmp))
+      this->dataPtr->set = true;
+    else
+      this->dataPtr->set = false;
+    return this->dataPtr->set;
+  }
+  // Catch invalid argument exception from std::stoi/stoul/stod/stof
+  catch(std::invalid_argument &)
+  {
+    sdferr << "Invalid argument. Unable to set value ["
+      << str << "] for key[" << this->dataPtr->key << "].\n";
+    return false;
+  }
+  // Catch out of range exception from std::stoi/stoul/stod/stof
+  catch(std::out_of_range &)
+  {
+    sdferr << "Out of range. Unable to set value ["
+      << str << " ] for key[" << this->dataPtr->key << "].\n";
+    return false;
+  }
+  // Catch other exceptions
+  catch(...)
+  {
+    if (str == "inf" || str == "-inf")
+    {
+      // in this case, the parser complains, but seems to assign the
+      // right values
+      sdfmsg << "INFO [sdf::Param]: throws when lexical casting "
+        << "inf's, but the values are usually passed through correctly\n";
+    }
+    else
+    {
+      sdferr << "Unable to set value [" <<  str
+        << "] for key[" << this->dataPtr->key << "]\n";
+      return false;
+    }
+  }
+
+  return false;
 }

@@ -71,7 +71,7 @@ TEST_F(SDFUpdate, UpdateAttribute)
   // Set test class variables based on sdf values
   // Set parameter update functions to test class accessors
   SDFUpdateFixture fixture;
-  nameParam->Get(fixture.name);
+  nameParam->Get<std::string>(fixture.name);
   nameParam->SetUpdateFunc(std::bind(&SDFUpdateFixture::GetName, &fixture));
 
   std::string nameCheck;
@@ -85,7 +85,7 @@ TEST_F(SDFUpdate, UpdateAttribute)
     sdfParsed.Root()->Update();
 
     // Expect sdf values to match test class variables
-    nameParam->Get(nameCheck);
+    nameParam->Get<std::string>(nameCheck);
     EXPECT_STREQ(nameCheck.c_str(), fixture.name.c_str());
   }
 }
@@ -122,9 +122,9 @@ TEST_F(SDFUpdate, UpdateElement)
   // Set test class variables based on sdf values
   // Set parameter update functions to test class accessors
   SDFUpdateFixture fixture;
-  staticParam->Get(fixture.flag);
+  staticParam->Get<bool>(fixture.flag);
   staticParam->SetUpdateFunc(std::bind(&SDFUpdateFixture::GetFlag, &fixture));
-  poseParam->Get(fixture.pose);
+  poseParam->Get<ignition::math::Pose3d>(fixture.pose);
   poseParam->SetUpdateFunc(std::bind(&SDFUpdateFixture::GetPose, &fixture));
 
   bool flagCheck;
@@ -142,9 +142,9 @@ TEST_F(SDFUpdate, UpdateElement)
     sdfParsed.Root()->Update();
 
     // Expect sdf values to match test class variables
-    staticParam->Get(flagCheck);
+    staticParam->Get<bool>(flagCheck);
     EXPECT_EQ(flagCheck, fixture.flag);
-    poseParam->Get(poseCheck);
+    poseParam->Get<ignition::math::Pose3d>(poseCheck);
     EXPECT_EQ(poseCheck, fixture.pose);
   }
 }
@@ -360,6 +360,11 @@ TEST_F(SDFUpdate, EmptyValues)
 /////////////////////////////////////////////////
 TEST_F(SDFUpdate, GetAny)
 {
+#ifndef _WIN32
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
   std::ostringstream stream;
   // Test types double, bool, string, int, vector3, color, pose
   stream << "<sdf version='1.5'>"
@@ -507,6 +512,9 @@ TEST_F(SDFUpdate, GetAny)
       FAIL();
     }
   }
+#ifndef _WIN32
+#pragma GCC diagnostic pop
+#endif
 }
 
 /////////////////////////////////////////////////
