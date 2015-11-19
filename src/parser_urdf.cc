@@ -1492,6 +1492,18 @@ void URDF2SDF::ParseSDFExtension(TiXmlDocument &_urdfXml)
         sdf->laserRetro = boost::lexical_cast<double>(
             GetKeyValueAsString(childElem).c_str());
       }
+      else if (childElem->ValueStr() == "springReference")
+      {
+        sdf->isSpringReference = true;
+        sdf->springReference = boost::lexical_cast<double>(
+            GetKeyValueAsString(childElem).c_str());
+      }
+      else if (childElem->ValueStr() == "springStiffness")
+      {
+        sdf->isSpringStiffness = true;
+        sdf->springStiffness = boost::lexical_cast<double>(
+            GetKeyValueAsString(childElem).c_str());
+      }
       else if (childElem->ValueStr() == "stopCfm")
       {
         sdf->isStopCfm = true;
@@ -2188,6 +2200,22 @@ void InsertSDFExtensionJoint(TiXmlElement *_elem,
           newLimit = true;
         }
 
+        TiXmlElement *axis = _elem->FirstChildElement("axis");
+        bool newAxis = false;
+        if (axis == NULL)
+        {
+          axis = new TiXmlElement("axis");
+          newAxis = true;
+        }
+
+        TiXmlElement *dynamics = axis->FirstChildElement("dynamics");
+        bool newDynamics = false;
+        if (dynamics == NULL)
+        {
+          dynamics = new TiXmlElement("dynamics");
+          newDynamics = true;
+        }
+
         // insert stopCfm, stopErp, fudgeFactor
         if ((*ge)->isStopCfm)
         {
@@ -2196,6 +2224,16 @@ void InsertSDFExtensionJoint(TiXmlElement *_elem,
         if ((*ge)->isStopErp)
         {
           AddKeyValue(limit, "erp", Values2str(1, &(*ge)->stopErp));
+        }
+        if ((*ge)->isSpringReference)
+        {
+          AddKeyValue(dynamics, "spring_reference",
+            Values2str(1, &(*ge)->springReference));
+        }
+        if ((*ge)->isSpringStiffness)
+        {
+          AddKeyValue(dynamics, "spring_stiffness",
+            Values2str(1, &(*ge)->springStiffness));
         }
         // if ((*ge)->isInitialJointPosition)
         //    AddKeyValue(_elem, "initialJointPosition",
@@ -2237,6 +2275,11 @@ void InsertSDFExtensionJoint(TiXmlElement *_elem,
         if ((*ge)->isFudgeFactor)
           AddKeyValue(physicsOde, "fudge_factor",
               Values2str(1, &(*ge)->fudgeFactor));
+
+        if (newDynamics)
+          axis->LinkEndChild(dynamics);
+        if (newAxis)
+          _elem->LinkEndChild(axis);
 
         if (newLimit)
           physicsOde->LinkEndChild(limit);
