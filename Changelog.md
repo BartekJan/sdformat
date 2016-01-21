@@ -25,8 +25,11 @@
     * [Pull request 199](https://bitbucket.org/osrf/sdformat/pull-requests/199)
 
 ## SDFormat 3.0
-
+     
 ### SDFormat 3.7.0 (2015-11-20)
+
+1. Fix tinyxml linking error
+     * [Pull request #209](https://bitbucket.org/osrf/sdformat/pull-request/209)
 
 1. Add spring pass through for sdf3
      * [Design document](https://bitbucket.org/osrf/gazebo_design/pull-requests/23)
