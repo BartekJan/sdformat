@@ -22,9 +22,16 @@
 #include <fstream>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "sdf/system_util.hh"
+
+#ifdef _WIN32
+// Disable warning C4251 which is triggered by
+// std::unique_ptr
+#pragma warning(push)
+#pragma warning(disable: 4251)
+#endif
 
 namespace sdf
 {
@@ -52,7 +59,7 @@ namespace sdf
 
   /// \def ConsolePtr
   /// \brief Shared pointer to a Console Element
-  typedef boost::shared_ptr<Console> ConsolePtr;
+  typedef std::shared_ptr<Console> ConsolePtr;
 
   /// \brief Message, error, warning, and logging functionality
   class SDFORMAT_VISIBLE Console
@@ -115,7 +122,9 @@ namespace sdf
                                const std::string &file,
                                unsigned int line);
 
-    private: ConsolePrivate *dataPtr;
+    /// \internal
+    /// \brief Pointer to private data.
+    private: std::unique_ptr<ConsolePrivate> dataPtr;
   };
 
   /// \internal
@@ -151,7 +160,11 @@ namespace sdf
     return *this;
   }
 
-
   /// \}
 }
+
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+
 #endif
