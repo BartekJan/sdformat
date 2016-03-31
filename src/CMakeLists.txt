@@ -10,6 +10,7 @@ link_directories(
   ${Boost_LIBRARY_DIR}
   ${IGNITION-MATH_LIBRARY_DIRS}
 )
+include_directories(${RUBY_INCLUDE_DIRS})
 
 if (USE_EXTERNAL_URDF)
   link_directories(${URDF_LIBRARY_DIRS})
@@ -75,7 +76,7 @@ set (gtest_sources
 sdf_build_tests(${gtest_sources})
 
 sdf_add_library(sdformat ${sources})
-target_link_libraries(sdformat ${Boost_LIBRARIES} ${IGNITION-MATH_LIBRARIES})
+target_link_libraries(sdformat ${Boost_LIBRARIES} ${IGNITION-MATH_LIBRARIES} ${RUBY_LIBRARY})
 
 if (USE_EXTERNAL_TINYXML)
   target_link_libraries(sdformat ${tinyxml_LIBRARIES})
