@@ -151,6 +151,7 @@ macro (sdf_build_tests)
         pthread
         ${tinyxml_LIBRARIES}
         ${IGNITION-MATH_LIBRARIES}
+        ${RUBY_LIBRARY}
       )
     elseif(WIN32)
       target_link_libraries(${BINARY_NAME}
@@ -159,6 +160,7 @@ macro (sdf_build_tests)
         sdformat.dll
         ${IGNITION-MATH_LIBRARIES}
         ${Boost_LIBRARIES}
+        ${RUBY_LIBRARY}
       )
     endif()
 
