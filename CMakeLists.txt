@@ -25,10 +25,10 @@ string (TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 # The protocol version has nothing to do with the package version set below.
 # It represents the current version of sdformat implement by the software
-set (SDF_PROTOCOL_VERSION 1.5)
+set (SDF_PROTOCOL_VERSION 1.6)
 
-set (SDF_MAJOR_VERSION 3)
-set (SDF_MINOR_VERSION 7)
+set (SDF_MAJOR_VERSION 4)
+set (SDF_MINOR_VERSION 1)
 set (SDF_PATCH_VERSION 0)
 
 set (SDF_VERSION ${SDF_MAJOR_VERSION}.${SDF_MINOR_VERSION})
@@ -251,6 +251,11 @@ else (buid_errors)
     ${CMAKE_CURRENT_BINARY_DIR}/cmake/sdformat.pc @ONLY)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/sdformat.pc DESTINATION
     ${LIB_INSTALL_DIR}/pkgconfig COMPONENT pkgconfig)
+
+  ########################################
+  # Configure documentation uploader
+  configure_file("${CMAKE_SOURCE_DIR}/cmake/upload_doc.sh.in"
+    ${CMAKE_BINARY_DIR}/upload_doc.sh @ONLY)
 
   ########################################
   # Make the cmake config files
