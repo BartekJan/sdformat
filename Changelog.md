@@ -1,4 +1,60 @@
+## SDFormat 4.0
+
+### SDFormat 4.2.0 (2016-10-10)
+
+1. Fix URDF to SDF `self_collide` bug.
+    * [Pull request 287](https://bitbucket.org/osrf/sdformat/pull-request/287)
+
+1. Added IMU orientation specification to SDF.
+    * [Pull request 284](https://bitbucket.org/osrf/sdformat/pull-request/284)
+
+### SDFormat 4.1.1 (2016-07-08)
+
+1. Added documentation and animation to `<actor>` element.
+    * [Pull request 280](https://bitbucket.org/osrf/sdformat/pull-request/280)
+
+1. Added tag to specify initial joint position
+    * [Pull request 279](https://bitbucket.org/osrf/sdformat/pull-request/279)
+
+### SDFormat 4.1.0 (2016-04-01)
+
+1. Added SDF conversion functions to parser including sdf::convertFile and sdf::convertString.
+    * [Pull request 266](https://bitbucket.org/osrf/sdformat/pull-request/266)
+
+1. Added an upload script
+    * [Pull request 256](https://bitbucket.org/osrf/sdformat/pull-request/256)
+ 
+### SDFormat 4.0.0 (2015-01-12)
+
+1. Boost pointers and boost::function in the public API have been replaced
+   by their std::equivalents (C++11 standard) 
+1. Move gravity and magnetic_field tags from physics to world
+    * [Pull request 247](https://bitbucket.org/osrf/sdformat/pull-request/247)
+1. Switch lump link prefix from lump:: to lump_
+    * [Pull request 245](https://bitbucket.org/osrf/sdformat/pull-request/245)
+1. New <wind> element.
+   A contribution from Olivier Crave
+    * [Pull request 240](https://bitbucket.org/osrf/sdformat/pull-request/240)
+1. Add scale to model state
+    * [Pull request 246](https://bitbucket.org/osrf/sdformat/pull-request/246)
+1. Use stof functions to parse hex strings as floating point params.
+   A contribution from Rich Mattes
+    * [Pull request 250](https://bitbucket.org/osrf/sdformat/pull-request/250)
+1. Fix memory leaks.
+   A contribution from Silvio Traversaro
+    * [Pull request 249](https://bitbucket.org/osrf/sdformat/pull-request/249)
+1. Update SDF to version 1.6: new style for representing the noise properties 
+   of an `imu`
+    * [Pull request 243](https://bitbucket.org/osrf/sdformat/pull-request/243)
+    * [Pull request 199](https://bitbucket.org/osrf/sdformat/pull-requests/199)
+
 ## SDFormat 3.0
+
+### SDFormat 3.X.X (201X-XX-XX)
+
+1. Improve precision of floating point parameters
+     * [Pull request 273](https://bitbucket.org/osrf/sdformat/pull-requests/273)
+     * [Pull request 276](https://bitbucket.org/osrf/sdformat/pull-requests/276)
 
 ### SDFormat 3.7.0 (2015-11-20)
 
