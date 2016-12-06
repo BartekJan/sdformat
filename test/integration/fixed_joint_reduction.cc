@@ -135,6 +135,7 @@ void FixedJointReductionCollisionVisualExtension(
   for (sdf::ElementPtr link = urdfModel->GetElement("link"); link;
        link = link->GetNextElement("link"))
   {
+    EXPECT_FALSE(link->HasElement("self_collide"));
     for (sdf::ElementPtr col = link->GetElement("collision"); col;
          col = col->GetNextElement("collision"))
     {
@@ -184,6 +185,7 @@ void FixedJointReductionCollisionVisualExtension(
   for (sdf::ElementPtr link = sdfModel->GetElement("link"); link;
        link = link->GetNextElement("link"))
   {
+    EXPECT_FALSE(link->HasElement("self_collide"));
     for (sdf::ElementPtr col = link->GetElement("collision"); col;
          col = col->GetNextElement("collision"))
     {
@@ -240,16 +242,16 @@ void FixedJointReductionCollisionVisualExtension(
   double sdf_mu1 = sdf_child_link_1_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu");
   sdfmsg << "urdf mu1: " << urdf_mu1 << "\n";
-  EXPECT_FLOAT_EQ(urdf_mu1, 0.7);
-  EXPECT_FLOAT_EQ(urdf_mu1, sdf_mu1);
+  EXPECT_DOUBLE_EQ(urdf_mu1, 0.7);
+  EXPECT_DOUBLE_EQ(urdf_mu1, sdf_mu1);
 
   double urdf_mu2 = urdf_child_link_1_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu2");
   double sdf_mu2 = sdf_child_link_1_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu2");
   sdfmsg << "urdf mu2: " << urdf_mu2 << "\n";
-  EXPECT_FLOAT_EQ(urdf_mu2, 0.71);
-  EXPECT_FLOAT_EQ(urdf_mu2, sdf_mu2);
+  EXPECT_DOUBLE_EQ(urdf_mu2, 0.71);
+  EXPECT_DOUBLE_EQ(urdf_mu2, sdf_mu2);
 
   EXPECT_EQ(urdf_child_link_1_vis->GetElement("material")->
             GetElement("script")->Get<std::string>("name"),
@@ -286,16 +288,16 @@ void FixedJointReductionCollisionVisualExtension(
   EXPECT_EQ(urdf_child_link_1a_col->Get<int>("max_contacts"),
              sdf_child_link_1a_col->Get<int>("max_contacts"));
 
-  EXPECT_FLOAT_EQ(urdf_child_link_1a_col->GetElement("surface")
+  EXPECT_DOUBLE_EQ(urdf_child_link_1a_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu"), 0.6);
-  EXPECT_FLOAT_EQ(urdf_child_link_1a_col->GetElement("surface")
+  EXPECT_DOUBLE_EQ(urdf_child_link_1a_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu"),
     sdf_child_link_1a_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu"));
 
-  EXPECT_FLOAT_EQ(urdf_child_link_1a_col->GetElement("surface")
+  EXPECT_DOUBLE_EQ(urdf_child_link_1a_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu2"), 0.61);
-  EXPECT_FLOAT_EQ(urdf_child_link_1a_col->GetElement("surface")
+  EXPECT_DOUBLE_EQ(urdf_child_link_1a_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu2"),
     sdf_child_link_1a_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu2"));
@@ -332,16 +334,16 @@ void FixedJointReductionCollisionVisualExtension(
   EXPECT_EQ(urdf_child_link_2_col->Get<int>("max_contacts"),
              sdf_child_link_2_col->Get<int>("max_contacts"));
 
-  EXPECT_FLOAT_EQ(urdf_child_link_2_col->GetElement("surface")
+  EXPECT_DOUBLE_EQ(urdf_child_link_2_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu"), 0.5);
-  EXPECT_FLOAT_EQ(urdf_child_link_2_col->GetElement("surface")
+  EXPECT_DOUBLE_EQ(urdf_child_link_2_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu"),
     sdf_child_link_2_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu"));
 
-  EXPECT_FLOAT_EQ(urdf_child_link_2_col->GetElement("surface")
+  EXPECT_DOUBLE_EQ(urdf_child_link_2_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu2"), 0.51);
-  EXPECT_FLOAT_EQ(urdf_child_link_2_col->GetElement("surface")
+  EXPECT_DOUBLE_EQ(urdf_child_link_2_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu2"),
     sdf_child_link_2_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu2"));
@@ -464,16 +466,16 @@ void FixedJointReductionCollisionVisualExtensionEmptyRoot(
   double sdf_mu1 = sdf_child_link_1_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu");
   sdfmsg << "urdf mu1: " << urdf_mu1 << "\n";
-  EXPECT_FLOAT_EQ(urdf_mu1, 0.7);
-  EXPECT_FLOAT_EQ(urdf_mu1, sdf_mu1);
+  EXPECT_DOUBLE_EQ(urdf_mu1, 0.7);
+  EXPECT_DOUBLE_EQ(urdf_mu1, sdf_mu1);
 
   double urdf_mu2 = urdf_child_link_1_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu2");
   double sdf_mu2 = sdf_child_link_1_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu2");
   sdfmsg << "urdf mu2: " << urdf_mu2 << "\n";
-  EXPECT_FLOAT_EQ(urdf_mu2, 0.71);
-  EXPECT_FLOAT_EQ(urdf_mu2, sdf_mu2);
+  EXPECT_DOUBLE_EQ(urdf_mu2, 0.71);
+  EXPECT_DOUBLE_EQ(urdf_mu2, sdf_mu2);
 
   EXPECT_EQ(urdf_child_link_1_vis->GetElement("material")->
             GetElement("script")->Get<std::string>("name"),
