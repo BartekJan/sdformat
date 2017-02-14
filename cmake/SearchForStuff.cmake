@@ -15,11 +15,11 @@ if (WIN32)
 endif()
 
 include(FindBoost)
-find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem program_options regex iostreams)
+find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem program_options)
 
 if (NOT Boost_FOUND)
   set (BUILD_SDF OFF CACHE INTERNAL "Build SDF" FORCE)
-  BUILD_ERROR ("Boost not found. Please install thread signals system filesystem program_options regex boost version ${MIN_BOOST_VERSION} or higher.")
+  BUILD_ERROR ("Boost not found. Please install system filesystem program_options boost version ${MIN_BOOST_VERSION} or higher.")
 endif()
 
 if (USE_EXTERNAL_TINYXML)
@@ -130,7 +130,7 @@ endmacro()
 
 ########################################
 # Find ignition math
-set(IGNITION-MATH_REQUIRED_MAJOR_VERSION 2)
+set(IGNITION-MATH_REQUIRED_MAJOR_VERSION 3)
 if (NOT DEFINED IGNITION-MATH_LIBRARY_DIRS AND NOT DEFINED IGNITION-MATH_INCLUDE_DIRS AND NOT DEFINED IGNITION-MATH_LIBRARIES)
   find_package(ignition-math${IGNITION-MATH_REQUIRED_MAJOR_VERSION} QUIET)
   if (NOT ignition-math${IGNITION-MATH_REQUIRED_MAJOR_VERSION}_FOUND)

@@ -1,13 +1,26 @@
+## SDFormat 6.0
+
+### SDFormat 6.0.0 (xxxx-xx-xx)
+
+1. Remove boost regex and iostreams as dependencies
+   * [Pull request 302](https://bitbucket.org/osrf/sdformat/pull-requests/302)
+
 ## SDFormat 5.0
 
 ### SDFormat 5.0.0 (xxxx-xx-xx)
 
+1. Removed SDFormat 4 deprecations
+    * [Pull request 295](https://bitbucket.org/osrf/sdformat/pull-requests/295)
+
 1. Added an example
     * [Pull request 275](https://bitbucket.org/osrf/sdformat/pull-requests/275)
 
-1. Move functions that use TinyXML classes in private headers by creating 
+1. Move functions that use TinyXML classes in private headers by creating
    `parser_private.hh` from `parser.hh` and by not installing `Converter.hh`.
     * [Pull request 262](https://bitbucket.org/osrf/sdformat/pull-requests/262)
+
+1. Require ignition-math3 as dependency
+    * [Pull request 299](https://bitbucket.org/osrf/sdformat/pull-requests/299)
 
 ## SDFormat 4.0
 
@@ -26,11 +39,11 @@
 
 1. Added an upload script
     * [Pull request 256](https://bitbucket.org/osrf/sdformat/pull-request/256)
- 
+
 ### SDFormat 4.0.0 (2015-01-12)
 
 1. Boost pointers and boost::function in the public API have been replaced
-   by their std::equivalents (C++11 standard) 
+   by their std::equivalents (C++11 standard)
 1. Move gravity and magnetic_field tags from physics to world
     * [Pull request 247](https://bitbucket.org/osrf/sdformat/pull-request/247)
 1. Switch lump link prefix from lump:: to lump_
@@ -46,7 +59,7 @@
 1. Fix memory leaks.
    A contribution from Silvio Traversaro
     * [Pull request 249](https://bitbucket.org/osrf/sdformat/pull-request/249)
-1. Update SDF to version 1.6: new style for representing the noise properties 
+1. Update SDF to version 1.6: new style for representing the noise properties
    of an `imu`
     * [Pull request 243](https://bitbucket.org/osrf/sdformat/pull-request/243)
     * [Pull request 199](https://bitbucket.org/osrf/sdformat/pull-requests/199)
