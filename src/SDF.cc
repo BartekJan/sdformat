@@ -22,20 +22,12 @@
 
 #include "sdf/parser.hh"
 #include "sdf/Assert.hh"
+#include "sdf/Console.hh"
 #include "sdf/SDFImpl.hh"
+#include "sdf/SDFImplPrivate.hh"
 #include "sdf/sdf_config.h"
 
 using namespace sdf;
-
-/// \todo Remove this pragma when SDF::version is removed
-#ifndef _WIN32
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-std::string SDF::version = SDF_VERSION;
-#ifndef _WIN32
-#pragma GCC diagnostic pop
-#endif
 
 typedef std::list<boost::filesystem::path> PathList;
 typedef std::map<std::string, PathList> URIPathMap;
@@ -43,6 +35,8 @@ typedef std::map<std::string, PathList> URIPathMap;
 URIPathMap g_uriPathMap;
 
 std::function<std::string (const std::string &)> g_findFileCB;
+
+std::string SDF::version = SDF_VERSION;
 
 /////////////////////////////////////////////////
 void sdf::setFindCallback(
@@ -165,14 +159,8 @@ void sdf::addURIPath(const std::string &_uri, const std::string &_path)
 }
 
 /////////////////////////////////////////////////
-/// \todo Remove this pragma once this->root is removed
-#ifndef _WIN32
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-/////////////////////////////////////////////////
 SDF::SDF()
-  : root(new Element)
+  : dataPtr(new SDFPrivate)
 {
 }
 
@@ -180,10 +168,6 @@ SDF::SDF()
 SDF::~SDF()
 {
 }
-/// \todo Remove this pragma once this->root is removed
-#ifndef _WIN32
-#pragma GCC diagnostic pop
-#endif
 
 /////////////////////////////////////////////////
 void SDF::PrintDescription()
@@ -354,22 +338,16 @@ void SDF::SetFromString(const std::string &_sdfData)
   }
 }
 
-/// \todo Remove this pragma once this->root this->version is removed
-#ifndef _WIN32
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
 /////////////////////////////////////////////////
 ElementPtr SDF::Root() const
 {
-  return this->root;
+  return this->dataPtr->root;
 }
 
 /////////////////////////////////////////////////
 void SDF::Root(const ElementPtr _root)
 {
-  this->root = _root;
+  this->dataPtr->root = _root;
 }
 
 /////////////////////////////////////////////////
@@ -383,7 +361,3 @@ void SDF::Version(const std::string &_version)
 {
   version = _version;
 }
-
-#ifndef _WIN32
-#pragma GCC diagnostic pop
-#endif
