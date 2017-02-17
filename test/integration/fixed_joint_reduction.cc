@@ -286,7 +286,7 @@ void FixedJointReductionCollisionVisualExtension(
   //    </material>
   EXPECT_EQ(urdf_child_link_1a_col->Get<int>("max_contacts"), 166);
   EXPECT_EQ(urdf_child_link_1a_col->Get<int>("max_contacts"),
-             sdf_child_link_1a_col->Get<int>("max_contacts"));
+            sdf_child_link_1a_col->Get<int>("max_contacts"));
 
   EXPECT_DOUBLE_EQ(urdf_child_link_1a_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu"), 0.6);
@@ -319,7 +319,7 @@ void FixedJointReductionCollisionVisualExtension(
             Get<sdf::Color>("ambient"), sdf::Color(0, 0, 0, 1));
   EXPECT_EQ(urdf_child_link_1a_vis->GetElement("material")->
             Get<sdf::Color>("ambient"),
-             sdf_child_link_1a_vis->GetElement("material")->
+            sdf_child_link_1a_vis->GetElement("material")->
             Get<sdf::Color>("ambient"));
 
   // child_link_2
@@ -332,7 +332,7 @@ void FixedJointReductionCollisionVisualExtension(
   // unassigne max_contacts defaut is 10
   EXPECT_EQ(urdf_child_link_2_col->Get<int>("max_contacts"), 10);
   EXPECT_EQ(urdf_child_link_2_col->Get<int>("max_contacts"),
-             sdf_child_link_2_col->Get<int>("max_contacts"));
+            sdf_child_link_2_col->Get<int>("max_contacts"));
 
   EXPECT_DOUBLE_EQ(urdf_child_link_2_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu"), 0.5);
@@ -353,7 +353,7 @@ void FixedJointReductionCollisionVisualExtension(
             "script_name_51");
   EXPECT_EQ(urdf_child_link_2_vis->GetElement("material")->
             GetElement("script")->Get<std::string>("name"),
-             sdf_child_link_2_vis->GetElement("material")->
+            sdf_child_link_2_vis->GetElement("material")->
             GetElement("script")->Get<std::string>("name"));
 
   EXPECT_EQ(urdf_child_link_2_vis->GetElement("material")->
@@ -365,7 +365,7 @@ void FixedJointReductionCollisionVisualExtension(
             Get<sdf::Color>("ambient"), sdf::Color(0, 0, 0, 1));
   EXPECT_EQ(urdf_child_link_2_vis->GetElement("material")->
             Get<sdf::Color>("ambient"),
-             sdf_child_link_2_vis->GetElement("material")->
+            sdf_child_link_2_vis->GetElement("material")->
             Get<sdf::Color>("ambient"));
 }
 
@@ -459,7 +459,7 @@ void FixedJointReductionCollisionVisualExtensionEmptyRoot(
   //     <script><name>script_uri_71_name</name></script>
   EXPECT_EQ(urdf_child_link_1_col->Get<int>("max_contacts"), 177);
   EXPECT_EQ(urdf_child_link_1_col->Get<int>("max_contacts"),
-             sdf_child_link_1_col->Get<int>("max_contacts"));
+            sdf_child_link_1_col->Get<int>("max_contacts"));
 
   double urdf_mu1 = urdf_child_link_1_col->GetElement("surface")
     ->GetElement("friction")->GetElement("ode")->Get<double>("mu");
@@ -482,7 +482,7 @@ void FixedJointReductionCollisionVisualExtensionEmptyRoot(
             "script_uri_71_name");
   EXPECT_EQ(urdf_child_link_1_vis->GetElement("material")->
             GetElement("script")->Get<std::string>("name"),
-             sdf_child_link_1_vis->GetElement("material")->
+            sdf_child_link_1_vis->GetElement("material")->
             GetElement("script")->Get<std::string>("name"));
 
   EXPECT_EQ(urdf_child_link_1_vis->GetElement("material")->
@@ -493,7 +493,7 @@ void FixedJointReductionCollisionVisualExtensionEmptyRoot(
             Get<sdf::Color>("ambient"), sdf::Color(0, 1, 0, 1));
   EXPECT_EQ(urdf_child_link_1_vis->GetElement("material")->
             Get<sdf::Color>("ambient"),
-             sdf_child_link_1_vis->GetElement("material")->
+            sdf_child_link_1_vis->GetElement("material")->
             Get<sdf::Color>("ambient"));
 }
 
