@@ -40,13 +40,6 @@
 
 namespace sdf
 {
-  /// \brief Windows equivalent of getEnv.
-  /// Should only be called when using windows.
-  /// \param[in] _name Name of the environment variable to get.
-  /// \return Environment variable contents, or NULL on error.
-  SDFORMAT_VISIBLE
-  const char *winGetEnv(const char *_name);
-
   /// \brief Split a string using the delimiter in splitter.
   /// \param[in] str       The string to split.
   /// \param[in] splitter  The delimiter to use.
@@ -54,6 +47,12 @@ namespace sdf
   SDFORMAT_VISIBLE
   std::vector<std::string> split(const std::string &_str,
                                  const std::string &_splitter);
+
+  /// \brief Trim leading and trailing whitespace from a string.
+  /// \param[in] in  The string to trim.
+  /// \return A string containing the trimmed value.
+  SDFORMAT_VISIBLE
+  std::string trim(const char *in);
 
   /// \brief check if two values are equal, within a tolerance
   /// \param[in] _a the first value

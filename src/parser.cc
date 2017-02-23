@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <map>
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
 #include "sdf/Console.hh"
@@ -227,8 +226,7 @@ bool initXml(TiXmlElement *_xml, ElementPtr _sdf)
       sdferr << "Attribute is missing a required string\n";
       return false;
     }
-    std::string requiredStr = requiredString;
-    boost::trim(requiredStr);
+    std::string requiredStr = sdf::trim(requiredString);
     bool required = requiredStr == "1" ? true : false;
     std::string description;
 
@@ -861,6 +859,23 @@ bool readXml(TiXmlElement *_xml, ElementPtr _sdf)
 }
 
 /////////////////////////////////////////////////
+static void replace_all(std::string& str,
+                        const std::string& from,
+                        const std::string& to)
+{
+  if (from.empty())
+  {
+    return;
+  }
+  size_t start_pos = 0;
+  while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+  {
+    str.replace(start_pos, from.length(), to);
+    start_pos += to.length();  // In case 'to' contains 'from'
+  }
+}
+
+/////////////////////////////////////////////////
 void copyChildren(ElementPtr _sdf, TiXmlElement *_xml)
 {
   // Iterate over all the child elements
@@ -966,12 +981,12 @@ void addNestedModel(ElementPtr _sdf, ElementPtr _includeSDF)
   for (std::map<std::string, std::string>::iterator iter = replace.begin();
        iter != replace.end(); ++iter)
   {
-    boost::replace_all(str, std::string("\"")+iter->first + "\"",
-                       std::string("\"") + iter->second + "\"");
-    boost::replace_all(str, std::string("'")+iter->first + "'",
-                       std::string("'") + iter->second + "'");
-    boost::replace_all(str, std::string(">")+iter->first + "<",
-                       std::string(">") + iter->second + "<");
+    replace_all(str, std::string("\"")+iter->first + "\"",
+                std::string("\"") + iter->second + "\"");
+    replace_all(str, std::string("'")+iter->first + "'",
+                std::string("'") + iter->second + "'");
+    replace_all(str, std::string(">")+iter->first + "<",
+                std::string(">") + iter->second + "<");
   }
 
   _includeSDF->ClearElements();
