@@ -15,10 +15,6 @@
  *
  */
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
-
 #include <string>
 #include <vector>
 
@@ -26,25 +22,6 @@
 
 namespace sdf
 {
-/////////////////////////////////////////////////
-#ifdef _WIN32
-const char *winGetEnv(const char *_name)
-{
-  const DWORD buffSize = 65535;
-  static char buffer[buffSize];
-  if (GetEnvironmentVariable(_name, buffer, buffSize))
-  {
-    return buffer;
-  }
-  return NULL;
-}
-#else
-const char *winGetEnv(const char * /*_name*/)
-{
-  return NULL;
-}
-#endif
-
 /////////////////////////////////////////////////
 std::vector<std::string> split(const std::string &_str,
                                const std::string &_splitter)
@@ -61,5 +38,21 @@ std::vector<std::string> split(const std::string &_str,
   }
 
   return ret;
+}
+
+//////////////////////////////////////////////////
+std::string trim(const char *_in)
+{
+  std::string str(_in);
+
+  const size_t strBegin = str.find_first_not_of(" \t");
+  if (strBegin == std::string::npos)
+  {
+    return "";  // no content
+  }
+
+  const size_t strRange = str.find_last_not_of(" \t") - strBegin + 1;
+
+  return str.substr(strBegin, strRange);
 }
 }
